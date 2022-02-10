@@ -7,6 +7,6 @@ export function isKBIssue(title:String):boolean{
 
 export function getAction(title:String):String{
     const splits = title.split(" ")
-    const name = splits[-1]
-    return name;
+    const name = splits.pop()
+    return name !== undefined ? name !== "" ? name : "not_present" : "not_present"
 }
