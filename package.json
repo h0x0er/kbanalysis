@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "ncc build src/index.ts -o dist/src"
+    "build": "ncc build src/index.ts -o dist/src",
+    "test": "ncc build tests/utils.test.ts -o tests/build/ && npm run run_tests",
+    "run_tests":"node tests/build/*"
   },
   "keywords": [],
   "author": "",

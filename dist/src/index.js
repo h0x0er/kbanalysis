@@ -8309,15 +8309,26 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(9971);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5127);
+
 
 
 try {
     const issue_id = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("issue-id");
     const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("github-token");
-    const repos = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo;
+    const repos = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo; // context repo
     const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token);
     const resp = await client.rest.issues.get({ issue_number: Number(issue_id), owner: repos.owner, repo: repos.repo });
-    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${resp.data.title}`);
+    const title = resp.data.title;
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .isKBIssue */ .y)(title)) {
+        const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getAction */ .s)(title);
+        const action_name_split = action_name.split("/");
+        const target_owner = action_name_split[0];
+        const target_repo = action_name_split[1];
+        const action_data = await client.rest.repos.getContent({ owner: target_owner, repo: target_repo, path: "/action.yml" });
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(action_data.data.toString());
+    }
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
 }
 catch (err) {
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);
@@ -8325,6 +8336,28 @@ catch (err) {
 
 __webpack_handle_async_dependencies__();
 }, 1);
+
+/***/ }),
+
+/***/ 5127:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "y": () => (/* binding */ isKBIssue),
+/* harmony export */   "s": () => (/* binding */ getAction)
+/* harmony export */ });
+function isKBIssue(title) {
+    const prefix = "[KB] Add KB for";
+    const index = title.indexOf(prefix);
+    return index === 0;
+}
+function getAction(title) {
+    const splits = title.split(" ");
+    const name = splits[-1];
+    return name;
+}
+
 
 /***/ }),
 
