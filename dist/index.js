@@ -8476,8 +8476,8 @@ try{
     const issue_id = core.getInput("issue-id");
     const token = core.getInput("github-token");
 
-    core.debug(`issue: ${issue_id}`)
-    core.debug(`token: ${token}`)
+    core.info(`issue: ${issue_id}`)
+    core.info(`token: ${token}`)
 
     const client = github.getOctokit(token);
     const repo = github.context.repo;
