@@ -8317,7 +8317,7 @@ try {
     const repos = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo;
     const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token);
     const resp = await client.rest.issues.get({ issue_number: Number(issue_id), owner: repos.owner, repo: repos.repo });
-    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${resp}`);
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${resp.data.title}`);
 }
 catch (err) {
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);

@@ -10,7 +10,7 @@ try{
     const client = github.getOctokit(token)
     const resp = await client.rest.issues.get({issue_number: Number(issue_id ), owner: repos.owner, repo:repos.repo})
 
-    core.info(`${resp}`)
+    core.info(`${resp.data.title}`)
 
 
 }catch(err){
