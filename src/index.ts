@@ -23,9 +23,9 @@ try{
 
         const action_data = await client.rest.repos.getContent({owner: target_owner, repo: target_repo,path: "/action.yml"})
 
-        // printing base64 decoded content.
+        // printing base64 encoded content.
         const content = action_data.data["content"]
-        core.info(atob(content))
+        core.info(content)
 
 
     }else{

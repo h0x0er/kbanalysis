@@ -8326,9 +8326,9 @@ try {
         const target_owner = action_name_split[0];
         const target_repo = action_name_split[1];
         const action_data = await client.rest.repos.getContent({ owner: target_owner, repo: target_repo, path: "/action.yml" });
-        // printing base64 decoded content.
+        // printing base64 encoded content.
         const content = action_data.data["content"];
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(atob(content));
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(content);
     }
     else {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
