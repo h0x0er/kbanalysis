@@ -22,10 +22,15 @@ try{
         const target_repo = action_name_split[1]
 
         const action_data = await client.rest.repos.getContent({owner: target_owner, repo: target_repo,path: "/action.yml"})
-        core.info(action_data.data.toString())
 
+        // printing base64 decoded content.
+        const content = action_data.data["content"]
+        core.info(atob(content))
+
+
+    }else{
+        core.info("Issue is not a valid KB issue")
     }
-    core.info("Issue is not a valid KB issue")
   
 
 }catch(err){

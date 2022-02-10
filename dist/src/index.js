@@ -8326,9 +8326,13 @@ try {
         const target_owner = action_name_split[0];
         const target_repo = action_name_split[1];
         const action_data = await client.rest.repos.getContent({ owner: target_owner, repo: target_repo, path: "/action.yml" });
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(action_data.data.toString());
+        // printing base64 decoded content.
+        const content = action_data.data["content"];
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(atob(content));
     }
-    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
+    else {
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
+    }
 }
 catch (err) {
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);
