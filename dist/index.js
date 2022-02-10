@@ -8471,6 +8471,7 @@ var __webpack_exports__ = {};
 const core =  __nccwpck_require__(6046)
 const github = __nccwpck_require__(9971)
 
+
 try{
 
     const issue_id = core.getInput("issue-id");
@@ -8481,16 +8482,14 @@ try{
 
     const client = github.getOctokit(token);
     const repo = github.context.repo;
-    client.rest.issues.get({
+    
+    const resp = client.rest.issues.get({
         owner: repo.owner, 
         repo: repo.repo,
         issue_number: issue_id
-    }).then((resp)=>{
-        core.info(`Issue title: ${resp.title}`)
-    }).catch((err)=>{
-        core.warning(err.message)
     })
 
+    core.info(resp)
 
 }catch(error){
     core.setFailed(error.message)
