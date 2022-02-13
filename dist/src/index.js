@@ -8347,17 +8347,24 @@ try {
             }
             else {
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
-                let paths_found = [];
-                for (let match of matches) {
-                    const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
-                    const res = await client.rest.search.code({ q: query });
-                    const items = res.data.items.map(item => item.html_url);
-                    paths_found.push(...items);
+                if (lang === "NOT_FOUND") {
+                    // Action is docker based no need to perform token_queries
+                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\n\n\`Docker Based Action\``;
+                    await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 }
-                const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
-                const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
-                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
-                (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
+                else {
+                    let paths_found = [];
+                    for (let match of matches) {
+                        const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
+                        const res = await client.rest.search.code({ q: query });
+                        const items = res.data.items.map(item => item.html_url);
+                        paths_found.push(...items);
+                    }
+                    const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
+                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
+                    (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
+                }
             }
         }
         catch (err) {
@@ -8407,7 +8414,18 @@ function validateAction(client, action) {
     // Function that will verify the existence of action
 }
 async function getActionYaml(client, owner, repo) {
-    const action_data = await client.rest.repos.getContent({ owner: owner, repo: repo, path: "/action.yml" });
+    let true_repo = "";
+    let path = "";
+    if (repo.indexOf("/") > 0) {
+        // nested repo.
+        const repo_split = repo.split("/");
+        true_repo = repo_split[0]; // first part is true_name of repo
+        path = repo_split.slice(1).join("/");
+    }
+    else {
+        true_repo = repo;
+    }
+    const action_data = await client.rest.repos.getContent({ owner: owner, repo: true_repo, path: path + "/action.yml" });
     // printing base64 encoded content.
     const encoded_content = action_data.data["content"].split("\n");
     const content = encoded_content.join("");

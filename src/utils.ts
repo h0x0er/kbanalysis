@@ -18,7 +18,18 @@ export function validateAction(client, action:String){
 }
 
 export async function getActionYaml(client: any, owner: String, repo: String ){
-    const action_data =  await client.rest.repos.getContent({owner: owner, repo: repo,path: "/action.yml"})
+    
+    let true_repo:String = ""
+    let path = ""
+    if(repo.indexOf("/") > 0){
+        // nested repo.
+        const repo_split = repo.split("/")
+        true_repo = repo_split[0] // first part is true_name of repo
+        path = repo_split.slice(1,).join("/")
+    }else{
+        true_repo = repo
+    }
+    const action_data =  await client.rest.repos.getContent({owner: owner, repo: true_repo,path: path+"/action.yml"})
     // printing base64 encoded content.
     const encoded_content = action_data.data["content"].split("\n")
     const content = encoded_content.join("")

@@ -42,20 +42,26 @@ try{
                 await comment(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN")
             }else{
                 core.info("Pattern Matches: "+matches.join(","))
-                let paths_found = []
-                for(let match of matches){
-                    const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
-                    const res = await client.rest.search.code({q: query})
-                    const items = res.data.items.map(item=>item.html_url)
-                    paths_found.push(...items)
+                if(lang === "NOT_FOUND"){
+                    // Action is docker based no need to perform token_queries
+                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\n\n\`Docker Based Action\``
+                    await comment(client, repos, Number(issue_id), body)
+
+                }else{
+                    let paths_found = []
+                    for(let match of matches){
+                        const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
+                        const res = await client.rest.search.code({q: query})
+                        const items = res.data.items.map(item=>item.html_url)
+                        paths_found.push(...items)
+                    }
+                    
+                    const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
+                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`
+                    await comment(client, repos, Number(issue_id), body)
+                    printArray(filtered_paths, "Paths Found: ")
                 }
-                
-                const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
-
-                const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`
-
-                await comment(client, repos, Number(issue_id), body)
-                printArray(filtered_paths, "Paths Found: ")
+ 
             }
 
         }catch(err){
