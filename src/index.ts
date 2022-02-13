@@ -46,10 +46,7 @@ try{
             await client.rest.issues.createComment({
                 ...repos,
                 issue_number: Number(issue_id),
-                body: `
-                    #### Analysis of ${action_name}
-                        ${paths_found.join("\n")}
-                `
+                body: `#### Analysis of ${action_name}\n${paths_found.join("\n")}`
             })
 
             printArray(paths_found, "Paths Found: ")
