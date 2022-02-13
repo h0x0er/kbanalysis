@@ -8325,7 +8325,7 @@ try {
         const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getAction */ .s7)(title); // target action
         const action_name_split = action_name.split("/");
         const target_owner = action_name_split[0];
-        const target_repo = action_name_split[1];
+        const target_repo = action_name_split.length > 2 ? action_name_split.slice(1).join("/") : action_name_split[1];
         const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
         const lang = Object.keys(langs.data)[0]; // top language used in repo
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue Title: ${title}`);

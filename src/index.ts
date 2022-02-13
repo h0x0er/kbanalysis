@@ -19,7 +19,7 @@ try{
         const action_name: String = getAction(title) // target action
         const action_name_split = action_name.split("/") 
         const target_owner = action_name_split[0]
-        const target_repo = action_name_split[1]
+        const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
 
 
         const langs = await client.rest.repos.listLanguages({owner:target_owner, repo:target_repo})
