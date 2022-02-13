@@ -48,7 +48,7 @@ try{
                 
                 const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
 
-                const body = `#### Analysis of ${action_name}\nGITHUB_TOKEN is used in this action.\n### For figuring usage of GITHUB_TOKEN follow below links.\n${filtered_paths.join("\n")}`
+                const body = `#### Analysis of ${action_name}\nGITHUB_TOKEN is used in this action.\n#### For figuring usage of GITHUB_TOKEN follow below links.\n${filtered_paths.join("\n")}`
 
                 await comment(client, repos, Number(issue_id), body)
                 printArray(filtered_paths, "Paths Found: ")
