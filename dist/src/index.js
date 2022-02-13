@@ -8347,8 +8347,9 @@ try {
                     const items = res.data.items.map(item => item.html_url);
                     paths_found.push(...items);
                 }
-                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), `#### Analysis of ${action_name}\n${paths_found.join("\n")}`);
-                (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(paths_found, "Paths Found: ");
+                const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
+                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), `#### Analysis of ${action_name}\n${filtered_paths.join("\n")}`);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
             }
         }
         catch (err) {

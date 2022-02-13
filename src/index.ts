@@ -38,16 +38,18 @@ try{
                 await comment(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN")
             }else{
                 let paths_found = []
+
                 for(let match of matches){
                     const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
                     const res = await client.rest.search.code({q: query})
                     const items = res.data.items.map(item=>item.html_url)
                     paths_found.push(...items)
                 }
-    
+                
+                const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
 
-                await comment(client, repos, Number(issue_id), `#### Analysis of ${action_name}\n${paths_found.join("\n")}`)
-                printArray(paths_found, "Paths Found: ")
+                await comment(client, repos, Number(issue_id), `#### Analysis of ${action_name}\n${filtered_paths.join("\n")}`)
+                printArray(filtered_paths, "Paths Found: ")
             }
 
         }catch(err){
