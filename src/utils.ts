@@ -29,7 +29,7 @@ export async function findToken(content:String){
     // if token is not found, returns list with null string
     const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi
     const matches = content.match(pattern)
-    return matches.filter((value, index, self)=> self.indexOf(value)===index) // returning only unique matches.
+    return matches !== null ? matches.filter((value, index, self)=> self.indexOf(value)===index) : null // returning only unique matches.
 }
 
 export function printArray(arr, header){
@@ -37,4 +37,12 @@ export function printArray(arr, header){
     for(let elem of arr){
         info(`-->${elem}`)
     }
+}
+
+export async function comment(client, repos, issue_id, body){
+    await client.rest.issues.createComment({
+        ...repos,
+        issue_number: Number(issue_id),
+        body: body
+    })
 }

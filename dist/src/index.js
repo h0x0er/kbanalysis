@@ -8330,27 +8330,38 @@ try {
         const lang = Object.keys(langs.data)[0]; // top language used in repo
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue Title: ${title}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action: ${action_name}`);
-        // core.info(`Token: ${token}`) // TODO: remove after testing
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
         try {
             const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
             const matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
-            let paths_found = [];
-            for (let match of matches) {
-                const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
-                const res = await client.rest.search.code({ q: query });
-                const items = res.data.items.map(item => item.url);
-                paths_found.push(...items);
+            if (matches === null) {
+                // no github_token pattern found in action file
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("action.yml doesn't contains reference to github_token");
+                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN");
             }
-            await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: `#### Analysis of ${action_name}\n${paths_found.join("\n")}` }));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(paths_found, "Paths Found: ");
+            else {
+                let paths_found = [];
+                for (let match of matches) {
+                    const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
+                    const res = await client.rest.search.code({ q: query });
+                    const items = res.data.items.map(item => item.url);
+                    paths_found.push(...items);
+                }
+                // await client.rest.issues.createComment({
+                //     ...repos,
+                //     issue_number: Number(issue_id),
+                //     body: `#### Analysis of ${action_name}\n${paths_found.join("\n")}`
+                // })
+                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), `#### Analysis of ${action_name}\n${paths_found.join("\n")}`);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(paths_found, "Paths Found: ");
+            }
         }
         catch (err) {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);
         }
     }
     else {
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Not performing analysis as issue is not a valid KB issue");
     }
 }
 catch (err) {
@@ -8371,7 +8382,8 @@ __webpack_handle_async_dependencies__();
 /* harmony export */   "s7": () => (/* binding */ getAction),
 /* harmony export */   "o": () => (/* binding */ getActionYaml),
 /* harmony export */   "pS": () => (/* binding */ findToken),
-/* harmony export */   "wq": () => (/* binding */ printArray)
+/* harmony export */   "wq": () => (/* binding */ printArray),
+/* harmony export */   "UI": () => (/* binding */ comment)
 /* harmony export */ });
 /* unused harmony export validateAction */
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(6046);
@@ -8401,13 +8413,16 @@ async function findToken(content) {
     // if token is not found, returns list with null string
     const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi;
     const matches = content.match(pattern);
-    return matches.filter((value, index, self) => self.indexOf(value) === index); // returning only unique matches.
+    return matches !== null ? matches.filter((value, index, self) => self.indexOf(value) === index) : null; // returning only unique matches.
 }
 function printArray(arr, header) {
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`${header}`);
     for (let elem of arr) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`-->${elem}`);
     }
+}
+async function comment(client, repos, issue_id, body) {
+    await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: body }));
 }
 
 

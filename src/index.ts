@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { isKBIssue, getAction, getActionYaml, findToken, printArray} from "./utils"
+import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment} from "./utils"
 
 try{
 
@@ -27,38 +27,38 @@ try{
         
         core.info(`Issue Title: ${title}`)
         core.info(`Action: ${action_name}`) 
-        // core.info(`Token: ${token}`) // TODO: remove after testing
         core.info(`Top language: ${lang}`)
 
         try{
             const action_data = await getActionYaml(client, target_owner, target_repo)
             const matches = await findToken(action_data)
-
-            let paths_found = []
-
-            for(let match of matches){
-                const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
-                const res = await client.rest.search.code({q: query})
-                const items = res.data.items.map(item=>item.url)
-                paths_found.push(...items)
+            if(matches === null){
+                // no github_token pattern found in action file
+                core.warning("action.yml doesn't contains reference to github_token")
+                await comment(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN")
+            }else{
+                let paths_found = []
+                for(let match of matches){
+                    const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
+                    const res = await client.rest.search.code({q: query})
+                    const items = res.data.items.map(item=>item.url)
+                    paths_found.push(...items)
+                }
+    
+                // await client.rest.issues.createComment({
+                //     ...repos,
+                //     issue_number: Number(issue_id),
+                //     body: `#### Analysis of ${action_name}\n${paths_found.join("\n")}`
+                // })
+                await comment(client, repos, Number(issue_id), `#### Analysis of ${action_name}\n${paths_found.join("\n")}`)
+                printArray(paths_found, "Paths Found: ")
             }
-
-            await client.rest.issues.createComment({
-                ...repos,
-                issue_number: Number(issue_id),
-                body: `#### Analysis of ${action_name}\n${paths_found.join("\n")}`
-            })
-
-            printArray(paths_found, "Paths Found: ")
 
         }catch(err){
             core.setFailed(err)
         }
-
-
-
     }else{
-        core.info("Issue is not a valid KB issue")
+        core.info("Not performing analysis as issue is not a valid KB issue")
     }
   
 
