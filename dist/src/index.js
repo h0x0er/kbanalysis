@@ -8348,7 +8348,7 @@ try {
             //         ${paths_found}
             //     `
             // })
-            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Performed analysis for ${action_name} \n${action_data}`);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Performed analysis for ${action_name} \n${paths_found}`);
         }
         catch (err) {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);

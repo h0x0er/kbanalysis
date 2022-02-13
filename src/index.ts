@@ -51,7 +51,7 @@ try{
             //     `
             // })
 
-            core.info(`Performed analysis for ${action_name} \n${action_data}`)
+            core.info(`Performed analysis for ${action_name} \n${paths_found}`)
 
         }catch(err){
             core.setFailed(err)
