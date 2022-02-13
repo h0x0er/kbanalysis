@@ -8349,7 +8349,7 @@ try {
                     paths_found.push(...items);
                 }
                 const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
-                const body = `### Analysis\nAction Name:${action_name}\nGITHUB_TOKEN matches: ${matches}\nTop language: ${lang}\n#### Followup Links.\n${filtered_paths.join("\n")}`;
+                const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
             }

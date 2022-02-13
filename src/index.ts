@@ -48,7 +48,7 @@ try{
                 
                 const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
 
-                const body = `### Analysis\nAction Name:${action_name}\nGITHUB_TOKEN matches: ${matches}\nTop language: ${lang}\n#### Followup Links.\n${filtered_paths.join("\n")}`
+                const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`
 
                 await comment(client, repos, Number(issue_id), body)
                 printArray(filtered_paths, "Paths Found: ")
