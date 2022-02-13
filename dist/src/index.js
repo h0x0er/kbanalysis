@@ -8340,6 +8340,7 @@ try {
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN");
             }
             else {
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
                 let paths_found = [];
                 for (let match of matches) {
                     const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;

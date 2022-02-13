@@ -37,8 +37,8 @@ try{
                 core.warning("action.yml doesn't contains reference to github_token")
                 await comment(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN")
             }else{
+                core.info("Pattern Matches: "+matches.join(","))
                 let paths_found = []
-
                 for(let match of matches){
                     const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
                     const res = await client.rest.search.code({q: query})
