@@ -21,9 +21,13 @@ try{
         const target_owner = action_name_split[0]
         const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
 
-
-        const langs = await client.rest.repos.listLanguages({owner:target_owner, repo:target_repo})
-        const lang = Object.keys(langs.data)[0] // top language used in repo
+        let lang:String = ""
+        try{
+            const langs = await client.rest.repos.listLanguages({owner:target_owner, repo:target_repo})
+            lang = Object.keys(langs.data)[0] // top language used in repo
+        }catch(err){
+            lang = "NOT_FOUND"
+        }
         
         core.info(`Issue Title: ${title}`)
         core.info(`Action: ${action_name}`) 
@@ -57,6 +61,8 @@ try{
         }catch(err){
             core.setFailed(err)
         }
+
+
     }else{
         core.info("Not performing analysis as issue is not a valid KB issue")
     }

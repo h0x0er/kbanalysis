@@ -8326,8 +8326,14 @@ try {
         const action_name_split = action_name.split("/");
         const target_owner = action_name_split[0];
         const target_repo = action_name_split.length > 2 ? action_name_split.slice(1).join("/") : action_name_split[1];
-        const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
-        const lang = Object.keys(langs.data)[0]; // top language used in repo
+        let lang = "";
+        try {
+            const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
+            lang = Object.keys(langs.data)[0]; // top language used in repo
+        }
+        catch (err) {
+            lang = "NOT_FOUND";
+        }
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue Title: ${title}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action: ${action_name}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
