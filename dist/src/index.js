@@ -8340,10 +8340,14 @@ try {
                 const items = res.data.items.map(item => item.url);
                 paths_found.push(...items);
             }
-            await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: `
-                    #### Analysis of ${action_name}
-                    ${paths_found}
-                ` }));
+            // await client.rest.issues.createComment({
+            //     ...repos,
+            //     issue_number: Number(issue_id),
+            //     body: `
+            //         #### Analysis of ${action_name}
+            //         ${paths_found}
+            //     `
+            // })
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Performed analysis for ${action_name} \n${action_data}`);
         }
         catch (err) {

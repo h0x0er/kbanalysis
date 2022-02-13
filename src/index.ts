@@ -42,14 +42,14 @@ try{
                 paths_found.push(...items)
             }
 
-            await client.rest.issues.createComment({
-                ...repos,
-                issue_number: Number(issue_id),
-                body: `
-                    #### Analysis of ${action_name}
-                    ${paths_found}
-                `
-            })
+            // await client.rest.issues.createComment({
+            //     ...repos,
+            //     issue_number: Number(issue_id),
+            //     body: `
+            //         #### Analysis of ${action_name}
+            //         ${paths_found}
+            //     `
+            // })
 
             core.info(`Performed analysis for ${action_name} \n${action_data}`)
 
