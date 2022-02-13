@@ -52,7 +52,7 @@ try{
             //     `
             // })
 
-            printArray(matches, "Paths Found: ")
+            printArray(paths_found, "Paths Found: ")
 
         }catch(err){
             core.setFailed(err)

@@ -8350,7 +8350,7 @@ try {
             //         ${paths_found}
             //     `
             // })
-            (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(matches, "Paths Found: ");
+            (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(paths_found, "Paths Found: ");
         }
         catch (err) {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);
