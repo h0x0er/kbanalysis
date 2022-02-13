@@ -8327,20 +8327,26 @@ try {
         const target_repo = action_name_split[1];
         const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
         const lang = Object.keys(langs.data)[0]; // top language used in repo
-        const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
-        const matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
-        let paths_found = [];
-        for (let match of matches) {
-            const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
-            const res = await client.rest.search.code({ q: query });
-            const items = res.data.items.map(item => item.url);
-            paths_found.push(...items);
-        }
-        await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: `
-                #### Analysis of ${action_name}
-                ${paths_found}
-            ` }));
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Performed analysis for ${action_name} \n${action_data}`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action: ${action_name}`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
+        // const action_data = await getActionYaml(client, target_owner, target_repo)
+        // const matches = await findToken(action_data)
+        // let paths_found = []
+        // for(let match of matches){
+        //     const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
+        //     const res = await client.rest.search.code({q: query})
+        //     const items = res.data.items.map(item=>item.url)
+        //     paths_found.push(...items)
+        // }
+        // await client.rest.issues.createComment({
+        //     ...repos,
+        //     issue_number: Number(issue_id),
+        //     body: `
+        //         #### Analysis of ${action_name}
+        //         ${paths_found}
+        //     `
+        // })
+        // core.info(`Performed analysis for ${action_name} \n${action_data}`)
     }
     else {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
@@ -8361,10 +8367,9 @@ __webpack_handle_async_dependencies__();
 "use strict";
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "yx": () => (/* binding */ isKBIssue),
-/* harmony export */   "s7": () => (/* binding */ getAction),
-/* harmony export */   "o": () => (/* binding */ getActionYaml),
-/* harmony export */   "pS": () => (/* binding */ findToken)
+/* harmony export */   "s7": () => (/* binding */ getAction)
 /* harmony export */ });
+/* unused harmony exports getActionYaml, findToken */
 function isKBIssue(title) {
     const prefix = "[KB] Add KB for";
     const index = title.indexOf(prefix);
