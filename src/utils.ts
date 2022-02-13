@@ -11,6 +11,10 @@ export function getAction(title:String){
     return name !== undefined ? name !== "" ? name : "not_present" : "not_present"
 }
 
+export function validateAction(client, action:String){
+    // Function that will verify the existence of action
+}
+
 export async function getActionYaml(client: any, owner: String, repo: String ){
     const action_data =  await client.rest.repos.getContent({owner: owner, repo: repo,path: "/action.yml"})
     // printing base64 encoded content.
