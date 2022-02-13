@@ -8317,18 +8317,30 @@ try {
     const issue_id = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("issue-id");
     const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("github-token");
     const repos = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo; // context repo
-    const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token);
+    const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token); // authenticated octokit
     const resp = await client.rest.issues.get({ issue_number: Number(issue_id), owner: repos.owner, repo: repos.repo });
-    const title = resp.data.title;
-    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .isKBIssue */ .y)(title)) {
-        const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getAction */ .s)(title);
+    const title = resp.data.title; // extracting title of the issue.
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .isKBIssue */ .yx)(title)) {
+        const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getAction */ .s7)(title); // target action
         const action_name_split = action_name.split("/");
         const target_owner = action_name_split[0];
         const target_repo = action_name_split[1];
-        const action_data = await client.rest.repos.getContent({ owner: target_owner, repo: target_repo, path: "/action.yml" });
-        // printing base64 encoded content.
-        const content = action_data.data["content"];
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(content);
+        const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
+        const lang = Object.keys(langs.data)[0]; // top language used in repo
+        const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
+        const matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
+        let paths_found = [];
+        for (let match of matches) {
+            const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
+            const res = await client.rest.search.code({ q: query });
+            const items = res.data.items.map(item => item.url);
+            paths_found.push(...items);
+        }
+        await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: `
+                #### Analysis of ${action_name}
+                ${paths_found}
+            ` }));
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Performed analysis for ${action_name} \n${action_data}`);
     }
     else {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue is not a valid KB issue");
@@ -8348,8 +8360,10 @@ __webpack_handle_async_dependencies__();
 
 "use strict";
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "y": () => (/* binding */ isKBIssue),
-/* harmony export */   "s": () => (/* binding */ getAction)
+/* harmony export */   "yx": () => (/* binding */ isKBIssue),
+/* harmony export */   "s7": () => (/* binding */ getAction),
+/* harmony export */   "o": () => (/* binding */ getActionYaml),
+/* harmony export */   "pS": () => (/* binding */ findToken)
 /* harmony export */ });
 function isKBIssue(title) {
     const prefix = "[KB] Add KB for";
@@ -8360,6 +8374,19 @@ function getAction(title) {
     const splits = title.split(" ");
     const name = splits.pop();
     return name !== undefined ? name !== "" ? name : "not_present" : "not_present";
+}
+async function getActionYaml(client, owner, repo) {
+    const action_data = await client.rest.repos.getContent({ owner: owner, repo: repo, path: "/action.yml" });
+    // printing base64 encoded content.
+    const encoded_content = action_data.data["content"].split("\n");
+    const content = encoded_content.join("");
+    return Buffer.from(content, "base64").toString(); // b64 decoding before returning
+}
+async function findToken(content) {
+    // if token is not found, returns list with null string
+    const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi;
+    const matches = content.match(pattern);
+    return matches.filter((value, index, self) => self.indexOf(value) === index); // returning only unique matches.
 }
 
 

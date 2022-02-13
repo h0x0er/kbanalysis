@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { isKBIssue, getAction} from "./utils"
+import { isKBIssue, getAction, getActionYaml, findToken} from "./utils"
 
 try{
 
@@ -9,23 +9,45 @@ try{
     
     const repos = github.context.repo // context repo
 
-    const client = github.getOctokit(token)
+    const client = github.getOctokit(token) // authenticated octokit
     const resp = await client.rest.issues.get({issue_number: Number(issue_id ), owner: repos.owner, repo:repos.repo})
 
-    const title = resp.data.title
+    const title = resp.data.title // extracting title of the issue.
+
     if(isKBIssue(title)){
 
-        const action_name: String = getAction(title)
-        const action_name_split = action_name.split("/")
-
+        const action_name: String = getAction(title) // target action
+        const action_name_split = action_name.split("/") 
         const target_owner = action_name_split[0]
         const target_repo = action_name_split[1]
 
-        const action_data = await client.rest.repos.getContent({owner: target_owner, repo: target_repo,path: "/action.yml"})
 
-        // printing base64 encoded content.
-        const content = action_data.data["content"]
-        core.info(content)
+        const langs = await client.rest.repos.listLanguages({owner:target_owner, repo:target_repo})
+        const lang = Object.keys(langs.data)[0] // top language used in repo
+    
+
+        const action_data = await getActionYaml(client, target_owner, target_repo)
+        const matches = await findToken(action_data)
+
+        let paths_found = []
+
+        for(let match of matches){
+            const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`
+            const res = await client.rest.search.code({q: query})
+            const items = res.data.items.map(item=>item.url)
+            paths_found.push(...items)
+        }
+
+        await client.rest.issues.createComment({
+            ...repos,
+            issue_number: Number(issue_id),
+            body: `
+                #### Analysis of ${action_name}
+                ${paths_found}
+            `
+        })
+
+        core.info(`Performed analysis for ${action_name} \n${action_data}`)
 
 
     }else{
