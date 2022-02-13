@@ -8321,16 +8321,18 @@ try {
     const resp = await client.rest.issues.get({ issue_number: Number(issue_id), owner: repos.owner, repo: repos.repo });
     const title = resp.data.title; // extracting title of the issue.
     if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .isKBIssue */ .yx)(title)) {
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("===== Performing analysis =====");
         const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getAction */ .s7)(title); // target action
         const action_name_split = action_name.split("/");
         const target_owner = action_name_split[0];
         const target_repo = action_name_split[1];
         const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
         const lang = Object.keys(langs.data)[0]; // top language used in repo
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue Title: ${title}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action: ${action_name}`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Token: ${token}`); // TODO: remove after testing
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
         try {
-            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("===== Performing analysis =====");
             const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
             const matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
             let paths_found = [];
@@ -8348,7 +8350,7 @@ try {
             //         ${paths_found}
             //     `
             // })
-            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Performed analysis for ${action_name} \n${paths_found}`);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(matches, "Paths Found: ");
         }
         catch (err) {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);
@@ -8375,9 +8377,13 @@ __webpack_handle_async_dependencies__();
 /* harmony export */   "yx": () => (/* binding */ isKBIssue),
 /* harmony export */   "s7": () => (/* binding */ getAction),
 /* harmony export */   "o": () => (/* binding */ getActionYaml),
-/* harmony export */   "pS": () => (/* binding */ findToken)
+/* harmony export */   "pS": () => (/* binding */ findToken),
+/* harmony export */   "wq": () => (/* binding */ printArray)
 /* harmony export */ });
 /* unused harmony export validateAction */
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(6046);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+
 function isKBIssue(title) {
     const prefix = "[KB] Add KB for";
     const index = title.indexOf(prefix);
@@ -8403,6 +8409,12 @@ async function findToken(content) {
     const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi;
     const matches = content.match(pattern);
     return matches.filter((value, index, self) => self.indexOf(value) === index); // returning only unique matches.
+}
+function printArray(arr, header) {
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`${header}`);
+    for (let elem of arr) {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`-->${elem}`);
+    }
 }
 
 

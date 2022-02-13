@@ -7,7 +7,7 @@ inputs:
   github-token:
     description: "github-token to be used for octokit authentication"
     required: true
-    default: "${{github.token}}"
+    default: "${{secrets.GITHUB_TOKEN}}"
     
 
 runs:

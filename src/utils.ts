@@ -1,3 +1,5 @@
+import {info} from "@actions/core"
+
 export function isKBIssue(title:String){
     const prefix = "[KB] Add KB for"
     const index = title.indexOf(prefix)
@@ -28,4 +30,11 @@ export async function findToken(content:String){
     const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi
     const matches = content.match(pattern)
     return matches.filter((value, index, self)=> self.indexOf(value)===index) // returning only unique matches.
+}
+
+export function printArray(arr, header){
+    info(`${header}`)
+    for(let elem of arr){
+        info(`-->${elem}`)
+    }
 }

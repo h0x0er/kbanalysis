@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { isKBIssue, getAction, getActionYaml, findToken} from "./utils"
+import { isKBIssue, getAction, getActionYaml, findToken, printArray} from "./utils"
 
 try{
 
@@ -15,7 +15,7 @@ try{
     const title = resp.data.title // extracting title of the issue.
 
     if(isKBIssue(title)){
-
+        core.info("===== Performing analysis =====")
         const action_name: String = getAction(title) // target action
         const action_name_split = action_name.split("/") 
         const target_owner = action_name_split[0]
@@ -25,11 +25,12 @@ try{
         const langs = await client.rest.repos.listLanguages({owner:target_owner, repo:target_repo})
         const lang = Object.keys(langs.data)[0] // top language used in repo
         
-        core.info(`Action: ${action_name}`)
+        core.info(`Issue Title: ${title}`)
+        core.info(`Action: ${action_name}`) 
+        core.info(`Token: ${token}`) // TODO: remove after testing
         core.info(`Top language: ${lang}`)
 
         try{
-            core.info("===== Performing analysis =====")
             const action_data = await getActionYaml(client, target_owner, target_repo)
             const matches = await findToken(action_data)
 
@@ -51,7 +52,7 @@ try{
             //     `
             // })
 
-            core.info(`Performed analysis for ${action_name} \n${paths_found}`)
+            printArray(matches, "Paths Found: ")
 
         }catch(err){
             core.setFailed(err)
