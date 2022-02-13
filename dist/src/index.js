@@ -8349,7 +8349,7 @@ try {
                     paths_found.push(...items);
                 }
                 const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
-                const body = `#### Analysis of ${action_name}\nGITHUB_TOKEN is used in this action.\n#### For figuring usage of GITHUB_TOKEN follow below links.\n${filtered_paths.join("\n")}`;
+                const body = `### Analysis\nAction Name:${action_name}\nGITHUB_TOKEN matches: ${matches}\nTop language: ${lang}\n#### Followup Links.\n${filtered_paths.join("\n")}`;
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
             }
@@ -8388,9 +8388,9 @@ __webpack_handle_async_dependencies__();
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
 
 function isKBIssue(title) {
-    const prefix = "[KB] Add KB for";
+    const prefix = "[KB] Add KB for"; // pattern to check, for KB issue
     const index = title.indexOf(prefix);
-    return index === 0;
+    return index === 0; // for valid KB issue; index of prefix is always 0
 }
 function getAction(title) {
     const splits = title.split(" ");
@@ -8408,7 +8408,8 @@ async function getActionYaml(client, owner, repo) {
     return Buffer.from(content, "base64").toString(); // b64 decoding before returning
 }
 async function findToken(content) {
-    // if token is not found, returns list with null string
+    // if token is not found, returns a list; otherwise return null
+    // TODO: always handle null; when used this function.
     const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi;
     const matches = content.match(pattern);
     return matches !== null ? matches.filter((value, index, self) => self.indexOf(value) === index) : null; // returning only unique matches.

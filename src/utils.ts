@@ -1,9 +1,9 @@
 import {info} from "@actions/core"
 
 export function isKBIssue(title:String){
-    const prefix = "[KB] Add KB for"
-    const index = title.indexOf(prefix)
-    return index === 0
+    const prefix = "[KB] Add KB for" // pattern to check, for KB issue
+    const index = title.indexOf(prefix) 
+    return index === 0 // for valid KB issue; index of prefix is always 0
 
 }
 
@@ -26,7 +26,8 @@ export async function getActionYaml(client: any, owner: String, repo: String ){
 }
 
 export async function findToken(content:String){
-    // if token is not found, returns list with null string
+    // if token is not found, returns a list; otherwise return null
+    // TODO: always handle null; when used this function.
     const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi
     const matches = content.match(pattern)
     return matches !== null ? matches.filter((value, index, self)=> self.indexOf(value)===index) : null // returning only unique matches.
