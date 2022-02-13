@@ -27,7 +27,7 @@ try{
         
         core.info(`Issue Title: ${title}`)
         core.info(`Action: ${action_name}`) 
-        core.info(`Token: ${token}`) // TODO: remove after testing
+        // core.info(`Token: ${token}`) // TODO: remove after testing
         core.info(`Top language: ${lang}`)
 
         try{
@@ -43,14 +43,14 @@ try{
                 paths_found.push(...items)
             }
 
-            // await client.rest.issues.createComment({
-            //     ...repos,
-            //     issue_number: Number(issue_id),
-            //     body: `
-            //         #### Analysis of ${action_name}
-            //         ${paths_found}
-            //     `
-            // })
+            await client.rest.issues.createComment({
+                ...repos,
+                issue_number: Number(issue_id),
+                body: `
+                    #### Analysis of ${action_name}
+                        ${paths_found.join("\n")}
+                `
+            })
 
             printArray(paths_found, "Paths Found: ")
 

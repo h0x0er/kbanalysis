@@ -8330,7 +8330,7 @@ try {
         const lang = Object.keys(langs.data)[0]; // top language used in repo
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue Title: ${title}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action: ${action_name}`);
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Token: ${token}`); // TODO: remove after testing
+        // core.info(`Token: ${token}`) // TODO: remove after testing
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
         try {
             const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
@@ -8342,14 +8342,10 @@ try {
                 const items = res.data.items.map(item => item.url);
                 paths_found.push(...items);
             }
-            // await client.rest.issues.createComment({
-            //     ...repos,
-            //     issue_number: Number(issue_id),
-            //     body: `
-            //         #### Analysis of ${action_name}
-            //         ${paths_found}
-            //     `
-            // })
+            await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: `
+                    #### Analysis of ${action_name}
+                        ${paths_found.join("\n")}
+                ` }));
             (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(paths_found, "Paths Found: ");
         }
         catch (err) {
