@@ -64,7 +64,7 @@ export function getRunsON(content: String){
 export async function findToken(content:String){
     // if token is not found, returns a list; otherwise return null
     // TODO: always handle null; when used this function.
-    const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi
+    const pattern = /(^(github|repo|gh|pat)[_,-](token|tok)$|(^token$))/gmi
     const matches = content.match(pattern)
     return matches !== null ? matches.filter((value, index, self)=> self.indexOf(value)===index) : null // returning only unique matches.
 }
