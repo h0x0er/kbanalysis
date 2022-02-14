@@ -8339,17 +8339,29 @@ try {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
         try {
             const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
-            const matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
-            if (matches === null) {
-                // no github_token pattern found in action file
-                _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("action.yml doesn't contains reference to github_token");
-                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN");
+            const readme_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getReadme */ .BQ)(client, target_owner, target_repo);
+            const action_type = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getRunsON */ .xA)(action_data);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action Type: ${action_type}`);
+            let matches = []; // // list holding all matches.
+            const action_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
+            const readme_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(readme_data);
+            if (readme_matches !== null) {
+                matches.push(...readme_matches); // pushing readme_matches in main matches.
+            }
+            if (action_matches !== null) {
+                matches.push(...action_matches);
+            }
+            if (matches.length === 0) {
+                // no github_token pattern found in action_file & readme file 
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Action doesn't contains reference to github_token");
+                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN");
             }
             else {
+                matches = matches.filter((value, index, self) => self.indexOf(value) === index); // unique matches only.
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
                 if (lang === "NOT_FOUND") {
                     // Action is docker based no need to perform token_queries
-                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\n\n\`Docker Based Action\``;
+                    const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}`;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 }
                 else {
@@ -8361,7 +8373,7 @@ try {
                         paths_found.push(...items);
                     }
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
-                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }
@@ -8392,6 +8404,8 @@ __webpack_handle_async_dependencies__();
 /* harmony export */   "yx": () => (/* binding */ isKBIssue),
 /* harmony export */   "s7": () => (/* binding */ getAction),
 /* harmony export */   "o": () => (/* binding */ getActionYaml),
+/* harmony export */   "BQ": () => (/* binding */ getReadme),
+/* harmony export */   "xA": () => (/* binding */ getRunsON),
 /* harmony export */   "pS": () => (/* binding */ findToken),
 /* harmony export */   "wq": () => (/* binding */ printArray),
 /* harmony export */   "UI": () => (/* binding */ comment)
@@ -8413,7 +8427,13 @@ function getAction(title) {
 function validateAction(client, action) {
     // Function that will verify the existence of action
 }
-async function getActionYaml(client, owner, repo) {
+async function getFile(client, owner, repo, path) {
+    const action_data = await client.rest.repos.getContent({ owner: owner, repo: repo, path: path });
+    const encoded_content = action_data.data["content"].split("\n");
+    const content = encoded_content.join("");
+    return Buffer.from(content, "base64").toString(); // b64 decoding before returning
+}
+function normalizeRepo(repo) {
     let true_repo = "";
     let path = "";
     if (repo.indexOf("/") > 0) {
@@ -8425,16 +8445,27 @@ async function getActionYaml(client, owner, repo) {
     else {
         true_repo = repo;
     }
-    const action_data = await client.rest.repos.getContent({ owner: owner, repo: true_repo, path: path + "/action.yml" });
-    // printing base64 encoded content.
-    const encoded_content = action_data.data["content"].split("\n");
-    const content = encoded_content.join("");
-    return Buffer.from(content, "base64").toString(); // b64 decoding before returning
+    return { repo: true_repo, path: path };
+}
+async function getActionYaml(client, owner, repo) {
+    const norm = normalizeRepo(repo);
+    const action_data = await getFile(client, owner, norm.repo, norm.path + "/action.yml");
+    return action_data;
+}
+async function getReadme(client, owner, repo) {
+    const norm = normalizeRepo(repo);
+    const readme = await getFile(client, owner, norm.repo, norm.path + "/README.md");
+    return readme;
+}
+function getRunsON(content) {
+    const usingIndex = content.indexOf("using:");
+    const usingString = content.substring(usingIndex + 6, usingIndex + 6 + 10);
+    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("docker") > -1 ? "Docker" : "Composite";
 }
 async function findToken(content) {
     // if token is not found, returns a list; otherwise return null
     // TODO: always handle null; when used this function.
-    const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi;
+    const pattern = /(^(github|repo|gh|pat)[_,-](token|tok)$|(^token$))/gmi;
     const matches = content.match(pattern);
     return matches !== null ? matches.filter((value, index, self) => self.indexOf(value) === index) : null; // returning only unique matches.
 }

@@ -17,10 +17,18 @@ export function validateAction(client, action:String){
     // Function that will verify the existence of action
 }
 
-export async function getActionYaml(client: any, owner: String, repo: String ){
-    
+async function getFile(client:any, owner:String, repo:String, path:String){
+
+    const action_data =  await client.rest.repos.getContent({owner: owner, repo: repo,path: path})
+    const encoded_content = action_data.data["content"].split("\n")
+    const content = encoded_content.join("")
+    return Buffer.from(content, "base64").toString() // b64 decoding before returning
+
+}
+
+function normalizeRepo(repo:String){
     let true_repo:String = ""
-    let path = ""
+    let path:String = ""
     if(repo.indexOf("/") > 0){
         // nested repo.
         const repo_split = repo.split("/")
@@ -29,17 +37,34 @@ export async function getActionYaml(client: any, owner: String, repo: String ){
     }else{
         true_repo = repo
     }
-    const action_data =  await client.rest.repos.getContent({owner: owner, repo: true_repo,path: path+"/action.yml"})
-    // printing base64 encoded content.
-    const encoded_content = action_data.data["content"].split("\n")
-    const content = encoded_content.join("")
-    return Buffer.from(content, "base64").toString() // b64 decoding before returning
+
+    return {repo:true_repo, path:path}
+}
+
+export async function getActionYaml(client: any, owner: String, repo: String){
+    
+    const norm = normalizeRepo(repo)
+    const action_data =  await getFile(client,owner, norm.repo,norm.path+"/action.yml")
+    return action_data
+
+}
+
+export async function getReadme(client:any, owner:String, repo:String){
+    const norm = normalizeRepo(repo)
+    const readme =  await getFile(client,owner, norm.repo,norm.path+"/README.md")
+    return readme
+}
+
+export function getRunsON(content: String){
+    const usingIndex = content.indexOf("using:")
+    const usingString = content.substring(usingIndex+6, usingIndex+6+10)
+    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("docker") > -1 ? "Docker" : "Composite"
 }
 
 export async function findToken(content:String){
     // if token is not found, returns a list; otherwise return null
     // TODO: always handle null; when used this function.
-    const pattern = /(((github)?|(repo)?|(gh)?|(pat)?){1}([_,-]token)|(token))/gmi
+    const pattern = /(^(github|repo|gh|pat)[_,-](token|tok)$|(^token$))/gmi
     const matches = content.match(pattern)
     return matches !== null ? matches.filter((value, index, self)=> self.indexOf(value)===index) : null // returning only unique matches.
 }
