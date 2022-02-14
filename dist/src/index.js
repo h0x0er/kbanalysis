@@ -8460,7 +8460,7 @@ async function getReadme(client, owner, repo) {
 function getRunsON(content) {
     const usingIndex = content.indexOf("using:");
     const usingString = content.substring(usingIndex + 6, usingIndex + 6 + 10);
-    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("Docker") > -1 ? "docker" : "Composite";
+    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("docker") > -1 ? "Docker" : "Composite";
 }
 async function findToken(content) {
     // if token is not found, returns a list; otherwise return null

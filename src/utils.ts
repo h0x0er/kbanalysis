@@ -58,7 +58,7 @@ export async function getReadme(client:any, owner:String, repo:String){
 export function getRunsON(content: String){
     const usingIndex = content.indexOf("using:")
     const usingString = content.substring(usingIndex+6, usingIndex+6+10)
-    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("Docker") > -1 ? "docker" : "Composite"
+    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("docker") > -1 ? "Docker" : "Composite"
 }
 
 export async function findToken(content:String){
