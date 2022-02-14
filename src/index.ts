@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON} from "./utils"
+import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme} from "./utils"
 
 try{
 
@@ -35,14 +35,25 @@ try{
 
         try{
             const action_data = await getActionYaml(client, target_owner, target_repo)
+            const readme_data = await getReadme(client, target_owner, target_repo)
             const action_type = getRunsON(action_data)
             core.info(`Action Type: ${action_type}`)
-            const matches = await findToken(action_data)
-            if(matches === null){
-                // no github_token pattern found in action file
-                core.warning("action.yml doesn't contains reference to github_token")
-                await comment(client, repos, Number(issue_id), "This action's `action.yml` doesn't contains any reference to GITHUB_TOKEN")
+
+            let matches:String[] = [] // // list holding all matches.
+            const action_matches = await findToken(action_data) 
+            const readme_matches = await findToken(readme_data)
+            if(readme_matches !== null){
+                matches.push(...readme_matches) // pushing readme_matches in main matches.
+            }
+            if(action_matches !== null){
+                matches.push(...action_matches)
+            }
+            if(matches.length === 0){
+                // no github_token pattern found in action_file & readme file 
+                core.warning("Action doesn't contains reference to github_token")
+                await comment(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN")
             }else{
+                matches = matches.filter((value, index, self)=>self.indexOf(value)===index) // unique matches only.
                 core.info("Pattern Matches: "+matches.join(","))
                 if(lang === "NOT_FOUND"){
                     // Action is docker based no need to perform token_queries
