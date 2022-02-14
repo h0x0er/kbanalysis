@@ -36,6 +36,12 @@ export async function getActionYaml(client: any, owner: String, repo: String ){
     return Buffer.from(content, "base64").toString() // b64 decoding before returning
 }
 
+export function getRunsON(content: String){
+    const usingIndex = content.indexOf("using:")
+    const usingString = content.substring(usingIndex+6, usingIndex+6+10)
+    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("Docker") > -1 ? "docker" : "Composite"
+}
+
 export async function findToken(content:String){
     // if token is not found, returns a list; otherwise return null
     // TODO: always handle null; when used this function.

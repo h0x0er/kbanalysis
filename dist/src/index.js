@@ -8339,6 +8339,8 @@ try {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
         try {
             const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
+            const action_type = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getRunsON */ .xA)(action_data);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action Type: ${action_type}`);
             const matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
             if (matches === null) {
                 // no github_token pattern found in action file
@@ -8349,7 +8351,7 @@ try {
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
                 if (lang === "NOT_FOUND") {
                     // Action is docker based no need to perform token_queries
-                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\n\n\`Docker Based Action\``;
+                    const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}`;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 }
                 else {
@@ -8361,7 +8363,7 @@ try {
                         paths_found.push(...items);
                     }
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
-                    const body = `### Analysis\nAction Name: ${action_name}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }
@@ -8392,6 +8394,7 @@ __webpack_handle_async_dependencies__();
 /* harmony export */   "yx": () => (/* binding */ isKBIssue),
 /* harmony export */   "s7": () => (/* binding */ getAction),
 /* harmony export */   "o": () => (/* binding */ getActionYaml),
+/* harmony export */   "xA": () => (/* binding */ getRunsON),
 /* harmony export */   "pS": () => (/* binding */ findToken),
 /* harmony export */   "wq": () => (/* binding */ printArray),
 /* harmony export */   "UI": () => (/* binding */ comment)
@@ -8430,6 +8433,11 @@ async function getActionYaml(client, owner, repo) {
     const encoded_content = action_data.data["content"].split("\n");
     const content = encoded_content.join("");
     return Buffer.from(content, "base64").toString(); // b64 decoding before returning
+}
+function getRunsON(content) {
+    const usingIndex = content.indexOf("using:");
+    const usingString = content.substring(usingIndex + 6, usingIndex + 6 + 10);
+    return usingString.indexOf("node") > -1 ? "Node" : usingString.indexOf("Docker") > -1 ? "docker" : "Composite";
 }
 async function findToken(content) {
     // if token is not found, returns a list; otherwise return null
