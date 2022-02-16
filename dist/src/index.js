@@ -8309,7 +8309,7 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(9971);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5127);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(354);
 
 
 
@@ -8357,23 +8357,38 @@ try {
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN");
             }
             else {
+                // we found some matches for github_token
                 matches = matches.filter((value, index, self) => self.indexOf(value) === index); // unique matches only.
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
                 if (lang === "NOT_FOUND") {
-                    // Action is docker based no need to perform token_queries
+                    // Action is docker or composite based no need to perform token_queries
                     const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}`;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 }
                 else {
-                    let paths_found = [];
+                    // Action is Node Based
+                    const is_used_github_api = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Github API used: ${is_used_github_api}`);
+                    let paths_found = []; // contains url to files
+                    let src_files = []; // contains file_paths relative to repo.
                     for (let match of matches) {
                         const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
                         const res = await client.rest.search.code({ q: query });
                         const items = res.data.items.map(item => item.html_url);
+                        const src_files = res.data.items.map(item => item.path);
                         paths_found.push(...items);
+                        src_files.push(...src_files);
                     }
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
-                    const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    let body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n`;
+                    if (is_used_github_api) {
+                        if (src_files.length !== 0) {
+                            body += "\n### Endpoints Found\n";
+                            const perms = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findEndpoints */ ._T)(client, target_owner, target_repo, src_files);
+                            body += (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .permsToString */ .W5)(perms);
+                        }
+                    }
+                    body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }
@@ -8396,23 +8411,71 @@ __webpack_handle_async_dependencies__();
 
 /***/ }),
 
-/***/ 5127:
+/***/ 354:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "yx": () => (/* binding */ isKBIssue),
-/* harmony export */   "s7": () => (/* binding */ getAction),
-/* harmony export */   "o": () => (/* binding */ getActionYaml),
-/* harmony export */   "BQ": () => (/* binding */ getReadme),
-/* harmony export */   "xA": () => (/* binding */ getRunsON),
-/* harmony export */   "pS": () => (/* binding */ findToken),
-/* harmony export */   "wq": () => (/* binding */ printArray),
-/* harmony export */   "UI": () => (/* binding */ comment)
-/* harmony export */ });
-/* unused harmony export validateAction */
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(6046);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "ft": () => (/* binding */ checkDependencies),
+  "UI": () => (/* binding */ comment),
+  "_T": () => (/* binding */ findEndpoints),
+  "pS": () => (/* binding */ findToken),
+  "s7": () => (/* binding */ getAction),
+  "o": () => (/* binding */ getActionYaml),
+  "BQ": () => (/* binding */ getReadme),
+  "xA": () => (/* binding */ getRunsON),
+  "yx": () => (/* binding */ isKBIssue),
+  "W5": () => (/* binding */ permsToString),
+  "wq": () => (/* binding */ printArray)
+});
+
+// UNUSED EXPORTS: normalizeRepo, readFile, validateAction
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(6046);
+;// CONCATENATED MODULE: ./src/endpoints.ts
+const ENDPOINTS = {
+    "pulls.listFiles": "pull-requests: read",
+    "pulls.checkIfMerged": "pull-requests: read",
+    "pulls.create": "pull-requests: write",
+    'pulls.createReplyForReviewComment': 'pull-requests: write',
+    'pulls.createReview': 'pull-requests: write',
+    'pulls.deletePendingReview': 'pull-requests: write',
+    'pulls.deleteReviewComment': 'pull-requests: write',
+    'pulls.dismissReview': 'pull-requests: write',
+    'pulls.get': 'pull-requests: read',
+    'pulls.getReview': 'pull-requests: read',
+    'pulls.getReviewComment': 'pull-requests: read',
+    'pulls.list': 'pull-requests: read',
+    'pulls.listCommentsForReview': 'pull-requests: read',
+    'pulls.listCommits': 'pull-requests: read',
+    'pulls.listRequestedReviewers': 'pull-requests: read',
+    'pulls.listReviewComments': 'pull-requests: read',
+    'pulls.listReviewCommentsForRepo': 'pull-requests: read',
+    'pulls.listReviews': 'pull-requests: read',
+    'pulls.merge': 'pull-requests: write',
+    'pulls.removeRequestedReviewers': 'pull-requests: write',
+    'pulls.requestReviewers': 'pull-requests: write',
+    'pulls.submitReview': 'pull-requests: write',
+    'pulls.update': 'pull-requests: write',
+    'pulls.updateBranch': 'pull-requests: write',
+    'pulls.updateReview': 'pull-requests: write',
+};
+const keys = Object.keys(ENDPOINTS);
+async function searchEndpoints(content) {
+    const output = {};
+    for (let key of keys) {
+        if (content.indexOf(key) !== -1) {
+            output[key] = ENDPOINTS[key];
+        }
+    }
+    return output;
+}
+
+;// CONCATENATED MODULE: ./src/utils.ts
+
 
 function isKBIssue(title) {
     const prefix = "[KB] Add KB for"; // pattern to check, for KB issue
@@ -8433,6 +8496,11 @@ async function getFile(client, owner, repo, path) {
     const content = encoded_content.join("");
     return Buffer.from(content, "base64").toString(); // b64 decoding before returning
 }
+async function readFile(client, owner, repo, path) {
+    const norm = normalizeRepo(repo);
+    const content = await getFile(client, owner, norm.repo, norm.path + "/" + path);
+    return content;
+}
 function normalizeRepo(repo) {
     let true_repo = "";
     let path = "";
@@ -8446,6 +8514,18 @@ function normalizeRepo(repo) {
         true_repo = repo;
     }
     return { repo: true_repo, path: path };
+}
+async function checkDependencies(client, owner, repo) {
+    // Function for analyzing package.json
+    // Note: Use this function only if the action is Node based.
+    const package_content = await readFile(client, owner, repo, "package.json");
+    const deps = ["github", "octokit"]; // if any one of these is present, check passes
+    for (let dep of deps) {
+        if (package_content.indexOf(dep) !== -1) {
+            return true;
+        }
+    }
+    return false;
 }
 async function getActionYaml(client, owner, repo) {
     const norm = normalizeRepo(repo);
@@ -8465,15 +8545,37 @@ function getRunsON(content) {
 async function findToken(content) {
     // if token is not found, returns a list; otherwise return null
     // TODO: always handle null; when used this function.
-    const pattern = /(^(github|repo|gh|pat)[_,-](token|tok)$|(token|oidc))/gmi;
+    const pattern = /((github|repo|gh|pat)[_,-](token|tok)|(token|oidc))/gmi;
     const matches = content.match(pattern);
     return matches !== null ? matches.filter((value, index, self) => self.indexOf(value) === index) : null; // returning only unique matches.
 }
 function printArray(arr, header) {
-    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`${header}`);
+    (0,core.info)(`${header}`);
     for (let elem of arr) {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`-->${elem}`);
+        (0,core.info)(`-->${elem}`);
     }
+}
+async function findEndpoints(client, owner, repo, src_files) {
+    let perms = {};
+    for (let src of src_files) {
+        let cont = await readFile(client, owner, repo, src);
+        let deps = await searchEndpoints(cont);
+        if (deps !== {}) {
+            let keys = Object.keys(deps);
+            for (let k of keys) {
+                perms[k] = deps[k];
+            }
+        }
+    }
+    return perms;
+}
+function permsToString(perms) {
+    const keys = Object.keys(perms);
+    let out = "";
+    for (let k of keys) {
+        out += `${k}: ${perms[k]}\n`;
+    }
+    return out;
 }
 async function comment(client, repos, issue_id, body) {
     await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: body }));
