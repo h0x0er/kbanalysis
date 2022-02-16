@@ -82,6 +82,7 @@ try{
                     }
                     
                     const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
+                    src_files = src_files.filter((value, index, self)=>self.indexOf(value)===index) // filtering src files.
                     core.info(`Src File found: ${src_files}`)
                     let body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n`
 
@@ -89,8 +90,9 @@ try{
                         if(src_files.length !== 0){
                             body += "\n### Endpoints Found\n"
                             const perms = await findEndpoints(client, target_owner, target_repo, src_files)
-                            body += permsToString(perms)
-                            core.info(`${body}`)
+                            let str_perms = permsToString(perms)
+                            body += str_perms
+                            core.info(`${str_perms}`)
                         }
                        
                     }

@@ -8380,14 +8380,16 @@ try {
                         src_files.push(...src);
                     }
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
+                    src_files = src_files.filter((value, index, self) => self.indexOf(value) === index); // filtering src files.
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Src File found: ${src_files}`);
                     let body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n`;
                     if (is_used_github_api) {
                         if (src_files.length !== 0) {
                             body += "\n### Endpoints Found\n";
                             const perms = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findEndpoints */ ._T)(client, target_owner, target_repo, src_files);
-                            body += (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .permsToString */ .W5)(perms);
-                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${body}`);
+                            let str_perms = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .permsToString */ .W5)(perms);
+                            body += str_perms;
+                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${str_perms}`);
                         }
                     }
                     body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
