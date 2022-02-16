@@ -82,7 +82,7 @@ try{
                     }
                     
                     const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
-  
+                    console.log(`Src File found: ${src_files}`)
                     let body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n`
 
                     if(is_used_github_api){
