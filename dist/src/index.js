@@ -8367,7 +8367,7 @@ try {
                 }
                 else {
                     // Action is Node Based
-                    const is_used_github_api = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
+                    const is_used_github_api = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Github API used: ${is_used_github_api}`);
                     let paths_found = []; // contains url to files
                     let src_files = []; // contains file_paths relative to repo.

@@ -65,7 +65,7 @@ try{
 
                 }else{
                     // Action is Node Based
-                    const is_used_github_api = checkDependencies(client, target_owner, target_repo)
+                    const is_used_github_api = await checkDependencies(client, target_owner, target_repo)
                     core.info(`Github API used: ${is_used_github_api}`)
                     let paths_found = [] // contains url to files
                     let src_files = [] // contains file_paths relative to repo.
@@ -84,7 +84,7 @@ try{
                     const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
   
                     let body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n`
-                    
+
                     if(is_used_github_api){
                         if(src_files.length !== 0){
                             body += "\n### Endpoints Found\n"
