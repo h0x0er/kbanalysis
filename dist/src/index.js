@@ -8375,9 +8375,9 @@ try {
                         const query = `${match}+in:file+repo:${target_owner}/${target_repo}+language:${lang}`;
                         const res = await client.rest.search.code({ q: query });
                         const items = res.data.items.map(item => item.html_url);
-                        const src_files = res.data.items.map(item => item.path);
+                        const src = res.data.items.map(item => item.path);
                         paths_found.push(...items);
-                        src_files.push(...src_files);
+                        src_files.push(...src);
                     }
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Src File found: ${src_files}`);

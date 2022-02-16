@@ -75,10 +75,10 @@ try{
                         const res = await client.rest.search.code({q: query})
                         
                         const items = res.data.items.map(item=>item.html_url)
-                        const src_files = res.data.items.map(item=>item.path)
+                        const src = res.data.items.map(item=>item.path)
                         
                         paths_found.push(...items)
-                        src_files.push(...src_files)
+                        src_files.push(...src)
                     }
                     
                     const filtered_paths = paths_found.filter((value, index, self)=>self.indexOf(value)===index)
