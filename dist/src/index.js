@@ -8575,7 +8575,8 @@ function permsToString(perms) {
     const keys = Object.keys(perms);
     let out = "";
     let header = "|Endpoint | Permission|\n";
-    header += "|---------| ----------|";
+    header += "|---------| ----------|\n";
+    out += header;
     for (let k of keys) {
         out += `${k} | ${perms[k]}\n`;
     }
