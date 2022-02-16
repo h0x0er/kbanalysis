@@ -118,8 +118,11 @@ export async function findEndpoints(client, owner:String, repo:String, src_files
 export function permsToString(perms:Object){
     const keys = Object.keys(perms)
     let out = ""
+    let header = "|Endpoint | Permission|\n"
+    header    += "|---------| ----------|" 
+
     for(let k of keys){
-        out += `${k}: ${perms[k]}\n`
+        out += `${k} | ${perms[k]}\n`
     }
     return out
 }

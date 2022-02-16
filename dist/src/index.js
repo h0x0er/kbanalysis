@@ -8387,6 +8387,7 @@ try {
                             body += "\n### Endpoints Found\n";
                             const perms = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findEndpoints */ ._T)(client, target_owner, target_repo, src_files);
                             body += (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .permsToString */ .W5)(perms);
+                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${body}`);
                         }
                     }
                     body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
@@ -8573,8 +8574,10 @@ async function findEndpoints(client, owner, repo, src_files) {
 function permsToString(perms) {
     const keys = Object.keys(perms);
     let out = "";
+    let header = "|Endpoint | Permission|\n";
+    header += "|---------| ----------|";
     for (let k of keys) {
-        out += `${k}: ${perms[k]}\n`;
+        out += `${k} | ${perms[k]}\n`;
     }
     return out;
 }

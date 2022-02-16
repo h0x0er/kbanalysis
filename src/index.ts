@@ -90,6 +90,7 @@ try{
                             body += "\n### Endpoints Found\n"
                             const perms = await findEndpoints(client, target_owner, target_repo, src_files)
                             body += permsToString(perms)
+                            core.info(`${body}`)
                         }
                        
                     }
