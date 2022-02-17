@@ -8364,7 +8364,7 @@ try {
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
                 if (lang === "NOT_FOUND" || action_type === "Docker" || action_type === "Composite") {
                     // Action is docker or composite based no need to perform token_queries
-                    const body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}`;
+                    const body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\n\`\`\``;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 }
                 else {
@@ -8387,7 +8387,7 @@ try {
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
                     src_files = src_files.filter((value, index, self) => self.indexOf(value) === index); // filtering src files.
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Src File found: ${src_files}`);
-                    let body = `### Analysis\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n`;
+                    let body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n\`\`\``;
                     if (is_used_github_api) {
                         if (src_files.length !== 0) {
                             body += "\n### Endpoints Found\n";
