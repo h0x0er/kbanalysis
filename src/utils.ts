@@ -73,7 +73,12 @@ export async function getActionYaml(client: any, owner: String, repo: String){
 
 export async function getReadme(client:any, owner:String, repo:String){
     const norm = normalizeRepo(repo)
-    const readme =  await getFile(client,owner, norm.repo,norm.path+"/README.md")
+    let readme = ""
+    try{
+        readme =  await getFile(client,owner, norm.repo,norm.path+"/README.md")
+    }catch{
+        readme = null
+    }
     return readme
 }
 
@@ -125,6 +130,12 @@ export function permsToString(perms:Object){
         out += `${k} | ${perms[k]}\n`
     }
     return out
+}
+
+export function isValidLang(lang:String){
+    // issue#10
+    const valid_string =  "javascripttypescript"
+    return valid_string.indexOf(lang.toLocaleLowerCase()) !== -1
 }
 
 export async function comment(client, repos, issue_id, body){

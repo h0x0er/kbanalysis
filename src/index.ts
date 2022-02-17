@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme, checkDependencies, findEndpoints, permsToString} from "./utils"
+import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme, checkDependencies, findEndpoints, permsToString, isValidLang} from "./utils"
 
 try{
 
@@ -42,14 +42,15 @@ try{
 
             let matches:String[] = [] // // list holding all matches.
             const action_matches = await findToken(action_data) 
-            const readme_matches = await findToken(readme_data)
-            if(readme_matches !== null){
-                matches.push(...readme_matches) // pushing readme_matches in main matches.
+            if(readme_data !== null){
+                const readme_matches = await findToken(readme_data)
+                if(readme_matches !== null){
+                    matches.push(...readme_matches) // pushing readme_matches in main matches.
+                }
             }
             if(action_matches !== null){
                 matches.push(...action_matches)
             }
-
             if(matches.length === 0){
                 // no github_token pattern found in action_file & readme file 
                 core.warning("Action doesn't contains reference to github_token")
@@ -66,7 +67,10 @@ try{
 
                 }else{
                     // Action is Node Based
-                    const is_used_github_api = await checkDependencies(client, target_owner, target_repo)
+                    let is_used_github_api = false 
+                    if(isValidLang(lang)){
+                        is_used_github_api =  await checkDependencies(client, target_owner, target_repo)
+                    }
                     core.info(`Github API used: ${is_used_github_api}`)
                     let paths_found = [] // contains url to files
                     let src_files = [] // contains file_paths relative to repo.
