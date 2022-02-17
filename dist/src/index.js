@@ -8344,9 +8344,11 @@ try {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action Type: ${action_type}`);
             let matches = []; // // list holding all matches.
             const action_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(action_data);
-            const readme_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(readme_data);
-            if (readme_matches !== null) {
-                matches.push(...readme_matches); // pushing readme_matches in main matches.
+            if (readme_data !== null) {
+                const readme_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .findToken */ .pS)(readme_data);
+                if (readme_matches !== null) {
+                    matches.push(...readme_matches); // pushing readme_matches in main matches.
+                }
             }
             if (action_matches !== null) {
                 matches.push(...action_matches);
@@ -8367,7 +8369,10 @@ try {
                 }
                 else {
                     // Action is Node Based
-                    const is_used_github_api = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
+                    let is_used_github_api = false;
+                    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .isValidLang */ .hy)(lang)) {
+                        is_used_github_api = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
+                    }
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Github API used: ${is_used_github_api}`);
                     let paths_found = []; // contains url to files
                     let src_files = []; // contains file_paths relative to repo.
@@ -8431,6 +8436,7 @@ __nccwpck_require__.d(__webpack_exports__, {
   "BQ": () => (/* binding */ getReadme),
   "xA": () => (/* binding */ getRunsON),
   "yx": () => (/* binding */ isKBIssue),
+  "hy": () => (/* binding */ isValidLang),
   "W5": () => (/* binding */ permsToString),
   "wq": () => (/* binding */ printArray)
 });
@@ -9206,7 +9212,13 @@ async function getActionYaml(client, owner, repo) {
 }
 async function getReadme(client, owner, repo) {
     const norm = normalizeRepo(repo);
-    const readme = await getFile(client, owner, norm.repo, norm.path + "/README.md");
+    let readme = "";
+    try {
+        readme = await getFile(client, owner, norm.repo, norm.path + "/README.md");
+    }
+    catch (_a) {
+        readme = null;
+    }
     return readme;
 }
 function getRunsON(content) {
@@ -9251,6 +9263,11 @@ function permsToString(perms) {
         out += `${k} | ${perms[k]}\n`;
     }
     return out;
+}
+function isValidLang(lang) {
+    // issue#10
+    const valid_string = "javascripttypescript";
+    return valid_string.indexOf(lang.toLocaleLowerCase()) !== -1;
 }
 async function comment(client, repos, issue_id, body) {
     await client.rest.issues.createComment(Object.assign(Object.assign({}, repos), { issue_number: Number(issue_id), body: body }));
