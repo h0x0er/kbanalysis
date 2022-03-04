@@ -8397,7 +8397,9 @@ try {
                             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${str_perms}`);
                         }
                     }
-                    body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    if (filtered_paths.length !== 0) {
+                        body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    }
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }

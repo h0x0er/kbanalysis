@@ -101,8 +101,9 @@ try{
                         }
                        
                     }
-                    
-                    body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`
+                    if(filtered_paths.length !== 0){
+                        body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`
+                    }
 
 
                     await comment(client, repos, Number(issue_id), body)
