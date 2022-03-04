@@ -8326,6 +8326,7 @@ try {
         const action_name_split = action_name.split("/");
         const target_owner = action_name_split[0];
         const target_repo = action_name_split.length > 2 ? action_name_split.slice(1).join("/") : action_name_split[1];
+        const repo_info = await client.rest.repos.get({ owner: target_owner, repo: target_repo }); // info related to repo.
         let lang = "";
         try {
             const langs = await client.rest.repos.listLanguages({ owner: target_owner, repo: target_repo });
@@ -8337,6 +8338,8 @@ try {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue Title: ${title}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action: ${action_name}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Top language: ${lang}`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Stars: ${repo_info.data.stargazers_count}`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Private: ${repo_info.data.private}`);
         try {
             const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getActionYaml */ .o)(client, target_owner, target_repo);
             const readme_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .getReadme */ .BQ)(client, target_owner, target_repo);
@@ -8356,7 +8359,8 @@ try {
             if (matches.length === 0) {
                 // no github_token pattern found in action_file & readme file 
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Action doesn't contains reference to github_token");
-                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN");
+                const template = `\n\`\`\`yaml\n${action_data.substring(0, action_data.indexOf("\n"))} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`;
+                await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN" + template);
             }
             else {
                 // we found some matches for github_token
@@ -8364,7 +8368,7 @@ try {
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Pattern Matches: " + matches.join(","));
                 if (lang === "NOT_FOUND" || action_type === "Docker" || action_type === "Composite") {
                     // Action is docker or composite based no need to perform token_queries
-                    const body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\n\`\`\``;
+                    const body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nStars: ${repo_info.data.stargazers_count}\nPrivate: ${repo_info.data.private}\`\`\``;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                 }
                 else {
@@ -8387,7 +8391,7 @@ try {
                     const filtered_paths = paths_found.filter((value, index, self) => self.indexOf(value) === index);
                     src_files = src_files.filter((value, index, self) => self.indexOf(value) === index); // filtering src files.
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Src File found: ${src_files}`);
-                    let body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\n\`\`\``;
+                    let body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\nStars: ${repo_info.data.stargazers_count}\nPrivate: ${repo_info.data.private}\n\`\`\``;
                     if (is_used_github_api) {
                         if (src_files.length !== 0) {
                             body += "\n### Endpoints Found\n";
@@ -8397,7 +8401,9 @@ try {
                             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${str_perms}`);
                         }
                     }
-                    body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    if (filtered_paths.length !== 0) {
+                        body += `#### FollowUp Links.\n${filtered_paths.join("\n")}`;
+                    }
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }
