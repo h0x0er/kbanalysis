@@ -8405,13 +8405,14 @@ try {
                                 let str_perms = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .permsToString */ .W5)(perms);
                                 body += str_perms;
                                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${str_perms}`);
-                                action_security_yaml = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .actionSecurity */ .LU)({ name: action_yaml_name, token_input: token_input, perms: perms });
+                                action_security_yaml += (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .actionSecurity */ .LU)({ name: action_yaml_name, token_input: token_input, perms: perms });
                             }
                         }
                     }
                     if (filtered_paths.length !== 0) {
                         body += `\n#### FollowUp Links.\n${filtered_paths.join("\n")}\n`;
                     }
+                    body += "\n" + action_security_yaml;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }

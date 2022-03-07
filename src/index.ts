@@ -114,7 +114,7 @@ try{
                                 let str_perms = permsToString(perms)
                                 body += str_perms
                                 core.info(`${str_perms}`)
-                                action_security_yaml = actionSecurity({name:action_yaml_name, token_input: token_input, perms:perms})
+                                action_security_yaml += actionSecurity({name:action_yaml_name, token_input: token_input, perms:perms})
 
 
                             }
