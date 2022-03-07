@@ -21,8 +21,8 @@ try{
         const target_owner = action_name_split[0]
         const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
 
-
-        const repo_info = await client.rest.repos.get({owner:target_owner, repo: target_repo}) // info related to repo.
+        
+        const repo_info = await client.rest.repos.get({owner:target_owner, repo: target_repo.split("/")[0]}) // info related to repo.
         
 
         let lang:String = ""
