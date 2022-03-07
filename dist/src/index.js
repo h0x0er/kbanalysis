@@ -8412,7 +8412,7 @@ try {
                     if (filtered_paths.length !== 0) {
                         body += `\n#### FollowUp Links.\n${filtered_paths.join("\n")}\n`;
                     }
-                    body += "\n" + action_security_yaml;
+                    body += "\n### action-security.yml\n" + action_security_yaml;
                     await (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                 }
@@ -8465,32 +8465,32 @@ __nccwpck_require__.d(__webpack_exports__, {
 var core = __nccwpck_require__(6046);
 ;// CONCATENATED MODULE: ./src/endpoints.ts
 const ENDPOINTS = {
-    "pulls.listFiles": "pull-requests: read",
-    "pulls.checkIfMerged": "pull-requests: read",
-    "pulls.create": "pull-requests: write",
-    'pulls.createReplyForReviewComment': 'pull-requests: write',
-    'pulls.createReview': 'pull-requests: write',
-    'pull.createReviewComment': "pull-requests: write",
-    'pulls.deletePendingReview': 'pull-requests: write',
-    'pulls.deleteReviewComment': 'pull-requests: write',
-    'pulls.dismissReview': 'pull-requests: write',
-    'pulls.get': 'pull-requests: read',
-    'pulls.getReview': 'pull-requests: read',
-    'pulls.getReviewComment': 'pull-requests: read',
-    'pulls.list': 'pull-requests: read',
-    'pulls.listCommentsForReview': 'pull-requests: read',
-    'pulls.listCommits': 'pull-requests: read',
-    'pulls.listRequestedReviewers': 'pull-requests: read',
-    'pulls.listReviewComments': 'pull-requests: read',
-    'pulls.listReviewCommentsForRepo': 'pull-requests: read',
-    'pulls.listReviews': 'pull-requests: read',
-    'pulls.merge': 'pull-requests: write',
-    'pulls.removeRequestedReviewers': 'pull-requests: write',
-    'pulls.requestReviewers': 'pull-requests: write',
-    'pulls.submitReview': 'pull-requests: write',
-    'pulls.update': 'pull-requests: write',
-    'pulls.updateBranch': 'pull-requests: write',
-    'pulls.updateReview': 'pull-requests: write',
+    "pulls.listFiles": "read",
+    "pulls.checkIfMerged": "read",
+    "pulls.create": "write",
+    'pulls.createReplyForReviewComment': 'write',
+    'pulls.createReview': 'write',
+    'pull.createReviewComment': "write",
+    'pulls.deletePendingReview': 'write',
+    'pulls.deleteReviewComment': 'write',
+    'pulls.dismissReview': 'write',
+    'pulls.get': 'read',
+    'pulls.getReview': 'read',
+    'pulls.getReviewComment': 'read',
+    'pulls.list': 'read',
+    'pulls.listCommentsForReview': 'read',
+    'pulls.listCommits': 'read',
+    'pulls.listRequestedReviewers': 'read',
+    'pulls.listReviewComments': 'read',
+    'pulls.listReviewCommentsForRepo': 'read',
+    'pulls.listReviews': 'read',
+    'pulls.merge': 'write',
+    'pulls.removeRequestedReviewers': 'write',
+    'pulls.requestReviewers': 'write',
+    'pulls.submitReview': 'write',
+    'pulls.update': 'write',
+    'pulls.updateBranch': 'write',
+    'pulls.updateReview': 'write',
     'actions.addSelectedRepoToOrgSecret': 'write',
     'actions.approveWorkflowRun': 'write',
     'actions.cancelWorkflowRun': 'write',
