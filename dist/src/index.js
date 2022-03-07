@@ -8405,7 +8405,7 @@ try {
                                 let str_perms = (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .permsToString */ .W5)(perms);
                                 body += str_perms;
                                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${str_perms}`);
-                                action_security_yaml += (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .actionSecurity */ .LU)({ name: action_yaml_name, token_input: token_input, perms: perms });
+                                action_security_yaml += (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .actionSecurity */ .LU)({ name: action_yaml_name, token_input: token_input, perms: (0,_utils__WEBPACK_IMPORTED_MODULE_2__/* .normalizePerms */ .So)(perms) });
                             }
                         }
                     }
@@ -8454,6 +8454,7 @@ __nccwpck_require__.d(__webpack_exports__, {
   "Ih": () => (/* binding */ getTokenInput),
   "yx": () => (/* binding */ isKBIssue),
   "hy": () => (/* binding */ isValidLang),
+  "So": () => (/* binding */ normalizePerms),
   "W5": () => (/* binding */ permsToString),
   "wq": () => (/* binding */ printArray)
 });
@@ -9309,6 +9310,32 @@ function actionSecurity(data) {
     }
     template.push("```\n");
     return template.join("\n");
+}
+function normalizePerms(perms) {
+    // const mapping = {"pul"}
+    const mapping = {
+        'actions': "actions",
+        'checks': "checks",
+        'git': "contents",
+        'issues': "issues",
+        'meta': "metadata",
+        'pulls': "pull-requests",
+        'repos': "contents",
+    };
+    let norm_perms = {};
+    for (let k of Object.keys(perms)) {
+        const prefix = mapping[k.split(".")[0]];
+        if (norm_perms[prefix] !== undefined) {
+            // key already exists
+            if (norm_perms[prefix] !== "write") {
+                norm_perms[prefix] = perms[k];
+            }
+        }
+        else {
+            norm_perms[prefix] = perms[k];
+        }
+    }
+    return norm_perms;
 }
 
 

@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme, checkDependencies, findEndpoints, permsToString, isValidLang, actionSecurity, getTokenInput} from "./utils"
+import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme, checkDependencies, findEndpoints, permsToString, isValidLang, actionSecurity, getTokenInput, normalizePerms} from "./utils"
 
 try{
 
@@ -114,7 +114,7 @@ try{
                                 let str_perms = permsToString(perms)
                                 body += str_perms
                                 core.info(`${str_perms}`)
-                                action_security_yaml += actionSecurity({name:action_yaml_name, token_input: token_input, perms:perms})
+                                action_security_yaml += actionSecurity({name:action_yaml_name, token_input: token_input, perms:normalizePerms(perms)})
 
 
                             }

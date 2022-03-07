@@ -176,3 +176,34 @@ export function actionSecurity(data:{name:string, token_input:string, perms:{}})
 
 
 }
+
+export function normalizePerms(perms:{}){
+
+    // const mapping = {"pul"}
+    const mapping = {
+        'actions':"actions", 
+        'checks':"checks",
+        'git':"contents",
+        'issues':"issues",
+        'meta':"metadata",            
+        'pulls':"pull-requests",
+        'repos':"contents",
+    }
+
+    let norm_perms = {}
+    for(let k of Object.keys(perms)){
+        const prefix = mapping[k.split(".")[0]]
+        if(norm_perms[prefix] !== undefined){
+            // key already exists
+            if(norm_perms[prefix] !== "write"){
+                norm_perms[prefix] = perms[k]
+            }
+        }else{
+            norm_perms[prefix] = perms[k]
+        }
+        
+    }
+
+    return norm_perms;
+
+}
