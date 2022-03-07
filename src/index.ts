@@ -128,7 +128,7 @@ try{
 
                     }
 
-
+                    body += "\n"+action_security_yaml
 
                     await comment(client, repos, Number(issue_id), body)
                     
