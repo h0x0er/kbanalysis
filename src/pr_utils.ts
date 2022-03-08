@@ -1,5 +1,6 @@
 import {exec } from "child_process";
 import * as core from "@actions/core";
+import { writeFile } from "fs";
 
 
 
@@ -15,10 +16,14 @@ function terminal(cmd:string){
 }
 
 
-export async function createPR(client, content:String, path:String){
+export async function createPR(client, content:string, path:String){
     terminal(`mkdir -p ${path}`)
     terminal(`touch ${path}/action-security.yml`)
     terminal(`ls ${path}`)
-    terminal(`git remote get-url origin --all`)
+    writeFile(`${path}/action-security.yml`, content, (err)=>{
+        if(err){
+            core.warning("error occurred while creating action-security.yml")
+        }
+    })
 
 }

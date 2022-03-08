@@ -8364,7 +8364,8 @@ try {
                 // no github_token pattern found in action_file & readme file 
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Action doesn't contains reference to github_token");
                 const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`;
-                await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_2__/* .createPR */ .b)(client, "tango", `knowledge-base/${target_owner}/${target_repo}`);
+                const pr_content = `${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n`;
+                await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_2__/* .createPR */ .b)(client, pr_content, `knowledge-base/${target_owner}/${target_repo}`);
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_3__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n" + template);
             }
             else {
@@ -8452,7 +8453,10 @@ __nccwpck_require__.d(__webpack_exports__, {
 const external_child_process_namespaceObject = require("child_process");
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(6046);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(7147);
 ;// CONCATENATED MODULE: ./src/pr_utils.ts
+
 
 
 function terminal(cmd) {
@@ -8472,7 +8476,11 @@ async function createPR(client, content, path) {
     terminal(`mkdir -p ${path}`);
     terminal(`touch ${path}/action-security.yml`);
     terminal(`ls ${path}`);
-    terminal(`git remote get-url origin --all`);
+    (0,external_fs_.writeFile)(`${path}/action-security.yml`, content, (err) => {
+        if (err) {
+            core.warning("error occurred while creating action-security.yml");
+        }
+    });
 }
 
 
