@@ -15,8 +15,8 @@ function terminal(cmd:string){
     })  
 }
 
-
 export async function createPR(client, content:string, path:String){
+    path = path.toLocaleLowerCase();
     terminal(`mkdir -p ${path}`)
     terminal(`touch ${path}/action-security.yml`)
     terminal(`ls ${path}`)

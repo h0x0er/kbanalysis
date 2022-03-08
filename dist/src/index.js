@@ -8473,6 +8473,7 @@ function terminal(cmd) {
     });
 }
 async function createPR(client, content, path) {
+    path = path.toLocaleLowerCase();
     terminal(`mkdir -p ${path}`);
     terminal(`touch ${path}/action-security.yml`);
     terminal(`ls ${path}`);
