@@ -8472,7 +8472,7 @@ async function createPR(client, content, path) {
     terminal(`mkdir -p ${path}`);
     terminal(`touch ${path}/action-security.yml`);
     terminal(`ls ${path}`);
-    terminal(`git remote origin --all`);
+    terminal(`git remote get-url origin --all`);
 }
 
 
