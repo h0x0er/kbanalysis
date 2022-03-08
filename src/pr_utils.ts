@@ -17,7 +17,7 @@ async function terminal(cmd:string){
 
 export async function createPR(client, content:String, path:String){
 
-    terminal(`touch ${path}/action-security.yml`)
-    terminal(`ls ${path}`)
+    await terminal(`touch ${path}/action-security.yml`)
+    await terminal(`ls ${path}`)
 
 }
