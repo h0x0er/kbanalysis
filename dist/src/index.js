@@ -8365,7 +8365,7 @@ try {
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Action doesn't contains reference to github_token");
                 const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`;
                 const pr_content = `${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n`;
-                await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_2__/* .createPR */ .b)(client, pr_content, `knowledge-base/${target_owner}/${target_repo}`);
+                await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_2__/* .createPR */ .b)(pr_content, `knowledge-base/${target_owner}/${target_repo}`);
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_3__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n" + template);
             }
             else {
@@ -8472,7 +8472,7 @@ function terminal(cmd) {
         }
     });
 }
-async function createPR(client, content, path) {
+async function createPR(content, path) {
     path = path.toLocaleLowerCase();
     terminal(`mkdir -p ${path}`);
     terminal(`touch ${path}/action-security.yml`);

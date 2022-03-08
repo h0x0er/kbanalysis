@@ -66,7 +66,7 @@ try{
                 core.warning("Action doesn't contains reference to github_token")
                 const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner+"/"+target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`
                 const pr_content = `${action_yaml_name} # ${target_owner+"/"+target_repo}\n# GITHUB_TOKEN not used\n`
-                await createPR(client, pr_content, `knowledge-base/${target_owner}/${target_repo}`)
+                await createPR(pr_content, `knowledge-base/${target_owner}/${target_repo}`)
 
                 await comment(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n"+template)
             }else{
