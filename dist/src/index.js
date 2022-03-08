@@ -8469,6 +8469,7 @@ async function terminal(cmd) {
     });
 }
 async function createPR(client, content, path) {
+    await terminal(`mkdir ${path}`);
     await terminal(`touch ${path}/action-security.yml`);
     await terminal(`ls ${path}`);
 }
