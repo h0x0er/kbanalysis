@@ -1,5 +1,6 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
+import { createPR } from "./pr_utils";
 import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme, checkDependencies, findEndpoints, permsToString, isValidLang, actionSecurity, getTokenInput, normalizePerms} from "./utils"
 
 try{
@@ -64,6 +65,7 @@ try{
                 // no github_token pattern found in action_file & readme file 
                 core.warning("Action doesn't contains reference to github_token")
                 const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner+"/"+target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`
+                await createPR(client, "tango", "fake_path")
                 await comment(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n"+template)
             }else{
                 // we found some matches for github_token
