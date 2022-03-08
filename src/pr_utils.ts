@@ -3,7 +3,7 @@ import * as core from "@actions/core";
 
 
 
-async function terminal(cmd:string){
+function terminal(cmd:string){
     exec(cmd, async (error, stdout, stderr)=>{
 
         if(error){core.warning(`Error occurred: ${error}`)}
@@ -16,8 +16,8 @@ async function terminal(cmd:string){
 
 
 export async function createPR(client, content:String, path:String){
-    await terminal(`mkdir ${path}`)
-    await terminal(`touch ${path}/action-security.yml`)
-    await terminal(`ls ${path}`)
+    terminal(`mkdir -p ${path}`)
+    terminal(`touch ${path}/action-security.yml`)
+    terminal(`ls ${path}`)
 
 }

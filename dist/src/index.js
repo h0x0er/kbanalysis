@@ -8455,7 +8455,7 @@ var core = __nccwpck_require__(6046);
 ;// CONCATENATED MODULE: ./src/pr_utils.ts
 
 
-async function terminal(cmd) {
+function terminal(cmd) {
     (0,external_child_process_namespaceObject.exec)(cmd, async (error, stdout, stderr) => {
         if (error) {
             core.warning(`Error occurred: ${error}`);
@@ -8469,9 +8469,9 @@ async function terminal(cmd) {
     });
 }
 async function createPR(client, content, path) {
-    await terminal(`mkdir ${path}`);
-    await terminal(`touch ${path}/action-security.yml`);
-    await terminal(`ls ${path}`);
+    terminal(`mkdir -p ${path}`);
+    terminal(`touch ${path}/action-security.yml`);
+    terminal(`ls ${path}`);
 }
 
 
