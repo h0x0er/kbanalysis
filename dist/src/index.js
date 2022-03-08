@@ -8364,7 +8364,7 @@ try {
                 // no github_token pattern found in action_file & readme file 
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Action doesn't contains reference to github_token");
                 const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`;
-                await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_2__/* .createPR */ .b)(client, "tango", "fake_path");
+                await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_2__/* .createPR */ .b)(client, "tango", `knowledge-base/${target_owner}/${target_repo}`);
                 await (0,_utils__WEBPACK_IMPORTED_MODULE_3__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n" + template);
             }
             else {
@@ -8455,8 +8455,8 @@ var core = __nccwpck_require__(6046);
 ;// CONCATENATED MODULE: ./src/pr_utils.ts
 
 
-async function createPR(client, content, path) {
-    (0,external_child_process_namespaceObject.exec)("ls -lah", async (error, stdout, stderr) => {
+async function terminal(cmd) {
+    (0,external_child_process_namespaceObject.exec)(cmd, async (error, stdout, stderr) => {
         if (error) {
             core.warning(`Error occurred: ${error}`);
         }
@@ -8464,9 +8464,13 @@ async function createPR(client, content, path) {
             core.warning(`Error occurred: ${stderr}`);
         }
         if (stdout) {
-            core.warning(`Error occurred: ${stdout}`);
+            core.info(`Output: ${stdout}`);
         }
     });
+}
+async function createPR(client, content, path) {
+    terminal(`touch ${path}/action-security.yml`);
+    terminal(`ls ${path}`);
 }
 
 

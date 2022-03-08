@@ -65,7 +65,7 @@ try{
                 // no github_token pattern found in action_file & readme file 
                 core.warning("Action doesn't contains reference to github_token")
                 const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner+"/"+target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`
-                await createPR(client, "tango", "fake_path")
+                await createPR(client, "tango", `knowledge-base/${target_owner}/${target_repo}`)
                 await comment(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n"+template)
             }else{
                 // we found some matches for github_token
