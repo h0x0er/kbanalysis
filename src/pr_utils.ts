@@ -19,5 +19,6 @@ export async function createPR(client, content:String, path:String){
     terminal(`mkdir -p ${path}`)
     terminal(`touch ${path}/action-security.yml`)
     terminal(`ls ${path}`)
+    terminal(`git remote origin --all`)
 
 }
