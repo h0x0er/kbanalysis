@@ -36,7 +36,6 @@ try{
             client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"GITHUB_TOKEN permissions used by this action", body: template.join("\n")})
             
             core.info(`Created issue in ${target_owner}/${target_repo}`)
-            exit(0)
 
         }
 
