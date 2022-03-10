@@ -1,6 +1,7 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { readFileSync } from "fs";
+import { existsSync, fstat, readFileSync } from "fs";
+import { exit } from "process";
 import { createPR } from "./pr_utils";
 import { isKBIssue, getAction, getActionYaml, findToken, printArray, comment, getRunsON, getReadme, checkDependencies, findEndpoints, permsToString, isValidLang, actionSecurity, getTokenInput, normalizePerms} from "./utils"
 
@@ -23,28 +24,27 @@ try{
         const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
 
         if(resp.data.state === "closed"){
-            // action-security file is added in KB
-            // 1. Read content of action-security.yml from knowledge-analysis folder
-            // 2. Create issue-body with content.
-            // 3. Create issue in target-repo, with specific Title   
-            // 4. End
-            // readFileSync
 
             const content = readFileSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)
-            let template = [] 
+            let template = []
+            template.push("At https://github.com/step-security/secure-workflows we are building a knowledge-base (KB) of permissions needed by different GitHub Actions. When developers try to remediate ossf/Scorecards checks, they use the knowledge-base to secure their GitHub Workflows.")
+            template.push("Below you can see the KB of this action.")
             template.push("```yaml")
             template.push(content)
             template.push("```")
-
-            client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"Dummy title", body: template.join("\n")})
+            template.push("This issue is automatically created by our analysis bot, feel free to close after reading :)")
+            client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"GITHUB_TOKEN permissions used by this action", body: template.join("\n")})
             
-            core.info("Created issue")
+            core.info(`Created issue in ${target_owner}/${target_repo}`)
 
         }
 
 
         core.info("===== Performing analysis =====")
-
+        if(existsSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)){
+            core.info("KB already exists")
+            exit(0)
+        }
         const repo_info = await client.rest.repos.get({owner:target_owner, repo: target_repo.split("/")[0]}) // info related to repo.
         
 
