@@ -25,7 +25,7 @@ try{
 
         if(resp.data.state === "closed"){
 
-            const content = readFileSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)
+            const content = readFileSync(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)
             let template = []
             template.push("At https://github.com/step-security/secure-workflows we are building a knowledge-base (KB) of permissions needed by different GitHub Actions. When developers try to remediate ossf/Scorecards checks, they use the knowledge-base to secure their GitHub Workflows.")
             template.push("Below you can see the KB of this action.")
@@ -36,9 +36,9 @@ try{
             client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"GITHUB_TOKEN permissions used by this action", body: template.join("\n")})
             
             core.info(`Created issue in ${target_owner}/${target_repo}`)
+            exit(0)
 
         }
-
 
         core.info("===== Performing analysis =====")
         if(!existsSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)){
@@ -167,10 +167,12 @@ try{
         }
 
 
+        }else{
+            core.info("Not performing analysis as issue is already analyzed")
+        }
     }else{
         core.info("Not performing analysis as issue is not a valid KB issue")
     }
-}
   
 
 }catch(err){
