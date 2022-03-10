@@ -41,10 +41,9 @@ try{
 
 
         core.info("===== Performing analysis =====")
-        if(existsSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)){
-            core.info("KB already exists")
-            exit(0)
-        }
+        if(!existsSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)){
+            
+        
         const repo_info = await client.rest.repos.get({owner:target_owner, repo: target_repo.split("/")[0]}) // info related to repo.
         
 
@@ -171,6 +170,7 @@ try{
     }else{
         core.info("Not performing analysis as issue is not a valid KB issue")
     }
+}
   
 
 }catch(err){
