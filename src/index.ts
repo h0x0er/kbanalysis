@@ -19,8 +19,7 @@ try{
     const title = resp.data.title // extracting title of the issue.
 
     if(isKBIssue(title)){
-        const issue_number = 71
-        const comment_id = 1070348821 
+
 
         core.info("Executed by event: "+event)
         const action_name: String = getAction(title) // target action
@@ -28,16 +27,19 @@ try{
         const target_owner = action_name_split[0]
         const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
 
-        const comment_resp = await client.rest.issues.getComment({owner:repos.owner, repo:repos.repo, issue_number:issue_number, comment_id:comment_id})
-        const comment_body = comment_resp.data.body
 
 
         if(resp.data.state === "closed"){
-            const main_repo = target_repo.split("/")[0]
-            
-            if(comment_body.indexOf(`${target_owner}/${main_repo}`) !== -1){
+            const issue_number = 71 // Data Store Issue ID
+            const comment_id = 1070348821 // Data Store comment ID
+            const target_main_repo = target_repo.split("/")[0]
+
+            const comment_resp = await client.rest.issues.getComment({owner:repos.owner, repo:repos.repo, issue_number:issue_number, comment_id:comment_id})
+            const comment_body = comment_resp.data.body
+                
+            if(comment_body.indexOf(`${target_owner}/${target_main_repo}`) !== -1){
                 // issue already created for repo
-                core.info(`Issue for ${target_owner}/${main_repo} is already created.\nExiting`)
+                core.info(`Issue for ${target_owner}/${target_main_repo} is already created.\nExiting`)
                 exit(0)
             }
             const content = readFileSync(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)
@@ -50,14 +52,18 @@ try{
             template.push("This issue is automatically created by our analysis bot, feel free to close after reading :)")
             client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"GITHUB_TOKEN permissions used by this action", body: template.join("\n")})
             
-            core.info(`Created issue in ${target_owner}/${main_repo}`)
-            // updating comment 
-            await client.rest.issues.updateComment({owner:repos.owner, repo:repos.repo, comment_id:comment_id, body:comment_resp.data.body+`\n${target_owner}/${main_repo}`})
+            core.info(`Created issue in ${target_owner}/${target_main_repo}`)
+            // updating comment in data_store
+            await client.rest.issues.updateComment({owner:repos.owner, repo:repos.repo, comment_id:comment_id, body:comment_resp.data.body+`\n${target_owner}/${target_main_repo}`})
+            exit(0)
 
         }
 
         core.info("===== Performing analysis =====")
-        if(!existsSync(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)){
+        if(existsSync(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)){
+            core.info("Not performing analysis as issue is already analyzed")
+            exit(0)
+        }
             
         
         const repo_info = await client.rest.repos.get({owner:target_owner, repo: target_repo.split("/")[0]}) // info related to repo.
@@ -183,9 +189,7 @@ try{
         }
 
 
-        }else{
-            core.info("Not performing analysis as issue is already analyzed")
-        }
+        
     }else{
         core.info("Not performing analysis as issue is not a valid KB issue")
     }
