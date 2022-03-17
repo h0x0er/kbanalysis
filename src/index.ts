@@ -26,19 +26,20 @@ try{
         const action_name: String = getAction(title) // target action
         const action_name_split = action_name.split("/") 
         const target_owner = action_name_split[0]
-        const target_repo = action_name_split[1]
+        const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
 
         const comment_resp = await client.rest.issues.getComment({owner:repos.owner, repo:repos.repo, issue_number:issue_number, comment_id:comment_id})
         const comment_body = comment_resp.data.body
-        if(comment_body.indexOf(`${target_owner}/${target_repo}`) !== -1){
-            // issue already created for repo
-            core.info(`Issue for ${target_owner}/${target_repo} is already created.\nExiting`)
-            exit(0)
-        }
 
 
         if(resp.data.state === "closed"){
-
+            const main_repo = target_repo.split("/")[0]
+            
+            if(comment_body.indexOf(`${target_owner}/${main_repo}`) !== -1){
+                // issue already created for repo
+                core.info(`Issue for ${target_owner}/${main_repo} is already created.\nExiting`)
+                exit(0)
+            }
             const content = readFileSync(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)
             let template = []
             template.push("At https://github.com/step-security/secure-workflows we are building a knowledge-base (KB) of permissions needed by different GitHub Actions. When developers try to remediate ossf/Scorecards checks, they use the knowledge-base to secure their GitHub Workflows.")
@@ -49,9 +50,9 @@ try{
             template.push("This issue is automatically created by our analysis bot, feel free to close after reading :)")
             client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"GITHUB_TOKEN permissions used by this action", body: template.join("\n")})
             
-            core.info(`Created issue in ${target_owner}/${target_repo}`)
+            core.info(`Created issue in ${target_owner}/${main_repo}`)
             // updating comment 
-            await client.rest.issues.updateComment({owner:repos.owner, repo:repos.repo, comment_id:comment_id, body:comment_resp.data.body+`\n${target_owner}/${target_repo}`})
+            await client.rest.issues.updateComment({owner:repos.owner, repo:repos.repo, comment_id:comment_id, body:comment_resp.data.body+`\n${target_owner}/${main_repo}`})
 
         }
 
