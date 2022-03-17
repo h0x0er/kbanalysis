@@ -11,6 +11,7 @@ try{
     const token = core.getInput("github-token")
     
     const repos = github.context.repo // context repo
+    const event = github.context.eventName
 
     const client = github.getOctokit(token) // authenticated octokit
     const resp = await client.rest.issues.get({issue_number: Number(issue_id ), owner: repos.owner, repo:repos.repo})
@@ -18,10 +19,23 @@ try{
     const title = resp.data.title // extracting title of the issue.
 
     if(isKBIssue(title)){
+        const issue_number = 71
+        const comment_id = 1070348821 
+
+        core.info("Executed by event: "+event)
         const action_name: String = getAction(title) // target action
         const action_name_split = action_name.split("/") 
         const target_owner = action_name_split[0]
-        const target_repo = action_name_split.length > 2 ? action_name_split.slice(1,).join("/") : action_name_split[1]
+        const target_repo = action_name_split[1]
+
+        const comment_resp = await client.rest.issues.getComment({owner:repos.owner, repo:repos.repo, issue_number:issue_number, comment_id:comment_id})
+        const comment_body = comment_resp.data.body
+        if(comment_body.indexOf(`${target_owner}/${target_repo}`) !== -1){
+            // issue already created for repo
+            core.info(`Issue for ${target_owner}/${target_repo} is already created.\nExiting`)
+            exit(0)
+        }
+
 
         if(resp.data.state === "closed"){
 
@@ -36,11 +50,13 @@ try{
             client.rest.issues.create({owner:"h0x0er", repo:"kb_setup", title:"GITHUB_TOKEN permissions used by this action", body: template.join("\n")})
             
             core.info(`Created issue in ${target_owner}/${target_repo}`)
+            // updating comment 
+            await client.rest.issues.updateComment({owner:repos.owner, repo:repos.repo, comment_id:comment_id, body:comment_resp.data.body+`\n${target_owner}/${target_repo}`})
 
         }
 
         core.info("===== Performing analysis =====")
-        if(!existsSync(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)){
+        if(!existsSync(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)){
             
         
         const repo_info = await client.rest.repos.get({owner:target_owner, repo: target_repo.split("/")[0]}) // info related to repo.

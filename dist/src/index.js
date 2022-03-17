@@ -8311,8 +8311,11 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(7147);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(fs__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _pr_utils__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(4141);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(354);
+/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(7282);
+/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(process__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _pr_utils__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(4141);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(354);
+
 
 
 
@@ -8322,14 +8325,25 @@ try {
     const issue_id = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("issue-id");
     const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("github-token");
     const repos = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo; // context repo
+    const event = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.eventName;
     const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token); // authenticated octokit
     const resp = await client.rest.issues.get({ issue_number: Number(issue_id), owner: repos.owner, repo: repos.repo });
     const title = resp.data.title; // extracting title of the issue.
-    if ((0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .isKBIssue */ .yx)(title)) {
-        const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .getAction */ .s7)(title); // target action
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .isKBIssue */ .yx)(title)) {
+        const issue_number = 71;
+        const comment_id = 1070348821;
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Executed by event: " + event);
+        const action_name = (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .getAction */ .s7)(title); // target action
         const action_name_split = action_name.split("/");
         const target_owner = action_name_split[0];
-        const target_repo = action_name_split.length > 2 ? action_name_split.slice(1).join("/") : action_name_split[1];
+        const target_repo = action_name_split[1];
+        const comment_resp = await client.rest.issues.getComment({ owner: repos.owner, repo: repos.repo, issue_number: issue_number, comment_id: comment_id });
+        const comment_body = comment_resp.data.body;
+        if (comment_body.indexOf(`${target_owner}/${target_repo}`) !== -1) {
+            // issue already created for repo
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Issue for ${target_owner}/${target_repo} is already created.\nExiting`);
+            (0,process__WEBPACK_IMPORTED_MODULE_3__.exit)(0);
+        }
         if (resp.data.state === "closed") {
             const content = (0,fs__WEBPACK_IMPORTED_MODULE_2__.readFileSync)(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`);
             let template = [];
@@ -8341,9 +8355,11 @@ try {
             template.push("This issue is automatically created by our analysis bot, feel free to close after reading :)");
             client.rest.issues.create({ owner: "h0x0er", repo: "kb_setup", title: "GITHUB_TOKEN permissions used by this action", body: template.join("\n") });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Created issue in ${target_owner}/${target_repo}`);
+            // updating comment 
+            await client.rest.issues.updateComment({ owner: repos.owner, repo: repos.repo, comment_id: comment_id, body: comment_resp.data.body + `\n${target_owner}/${target_repo}` });
         }
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("===== Performing analysis =====");
-        if (!(0,fs__WEBPACK_IMPORTED_MODULE_2__.existsSync)(`knowledge-base/${target_owner}/${target_repo}/action-security.yml`)) {
+        if (!(0,fs__WEBPACK_IMPORTED_MODULE_2__.existsSync)(`knowledge-base/${target_owner.toLocaleLowerCase()}/${target_repo.toLocaleLowerCase()}/action-security.yml`)) {
             const repo_info = await client.rest.repos.get({ owner: target_owner, repo: target_repo.split("/")[0] }); // info related to repo.
             let lang = "";
             try {
@@ -8359,16 +8375,16 @@ try {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Stars: ${repo_info.data.stargazers_count}`);
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Private: ${repo_info.data.private}`);
             try {
-                const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .getActionYaml */ .o)(client, target_owner, target_repo);
-                const readme_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .getReadme */ .BQ)(client, target_owner, target_repo);
+                const action_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .getActionYaml */ .o)(client, target_owner, target_repo);
+                const readme_data = await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .getReadme */ .BQ)(client, target_owner, target_repo);
                 const start = action_data.indexOf("name:");
                 const action_yaml_name = action_data.substring(start, start + action_data.substring(start).indexOf("\n"));
-                const action_type = (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .getRunsON */ .xA)(action_data);
+                const action_type = (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .getRunsON */ .xA)(action_data);
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Action Type: ${action_type}`);
                 let matches = []; // // list holding all matches.
-                const action_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .findToken */ .pS)(action_data);
+                const action_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .findToken */ .pS)(action_data);
                 if (readme_data !== null) {
-                    const readme_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .findToken */ .pS)(readme_data);
+                    const readme_matches = await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .findToken */ .pS)(readme_data);
                     if (readme_matches !== null) {
                         matches.push(...readme_matches); // pushing readme_matches in main matches.
                     }
@@ -8381,8 +8397,8 @@ try {
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Action doesn't contains reference to github_token");
                     const template = `\n\`\`\`yaml\n${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n\`\`\`\n`;
                     const pr_content = `${action_yaml_name} # ${target_owner + "/" + target_repo}\n# GITHUB_TOKEN not used\n`;
-                    await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_3__/* .createPR */ .b)(pr_content, `knowledge-base/${target_owner}/${target_repo}`);
-                    await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n" + template);
+                    await (0,_pr_utils__WEBPACK_IMPORTED_MODULE_4__/* .createPR */ .b)(pr_content, `knowledge-base/${target_owner}/${target_repo}`);
+                    await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .comment */ .UI)(client, repos, Number(issue_id), "This action's `action.yml` & `README.md` doesn't contains any reference to GITHUB_TOKEN\n### action-security.yml\n" + template);
                 }
                 else {
                     // we found some matches for github_token
@@ -8391,13 +8407,13 @@ try {
                     if (lang === "NOT_FOUND" || action_type === "Docker" || action_type === "Composite") {
                         // Action is docker or composite based no need to perform token_queries
                         const body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nStars: ${repo_info.data.stargazers_count}\nPrivate: ${repo_info.data.private}\nForks: ${repo_info.data.forks_count}\n\`\`\``;
-                        await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .comment */ .UI)(client, repos, Number(issue_id), body);
+                        await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .comment */ .UI)(client, repos, Number(issue_id), body);
                     }
                     else {
                         // Action is Node Based
                         let is_used_github_api = false;
-                        if ((0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .isValidLang */ .hy)(lang)) {
-                            is_used_github_api = await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
+                        if ((0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .isValidLang */ .hy)(lang)) {
+                            is_used_github_api = await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .checkDependencies */ .ft)(client, target_owner, target_repo);
                         }
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Github API used: ${is_used_github_api}`);
                         let paths_found = []; // contains url to files
@@ -8415,17 +8431,17 @@ try {
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Src File found: ${src_files}`);
                         let body = `### Analysis\n\`\`\`yml\nAction Name: ${action_name}\nAction Type: ${action_type}\nGITHUB_TOKEN Matches: ${matches}\nTop language: ${lang}\nStars: ${repo_info.data.stargazers_count}\nPrivate: ${repo_info.data.private}\nForks: ${repo_info.data.forks_count}\n\`\`\``;
                         let action_security_yaml = "";
-                        const valid_input = (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .getTokenInput */ .Ih)(action_data, matches);
+                        const valid_input = (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .getTokenInput */ .Ih)(action_data, matches);
                         let token_input = valid_input !== "env_var" ? `action-input:\n    input: ${valid_input}` : `environment-variable-name: <FigureOutYourself>`;
                         if (is_used_github_api) {
                             if (src_files.length !== 0) {
                                 body += "\n### Endpoints Found\n";
-                                const perms = await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .findEndpoints */ ._T)(client, target_owner, target_repo, src_files);
+                                const perms = await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .findEndpoints */ ._T)(client, target_owner, target_repo, src_files);
                                 if (perms !== {}) {
-                                    let str_perms = (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .permsToString */ .W5)(perms);
+                                    let str_perms = (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .permsToString */ .W5)(perms);
                                     body += str_perms;
                                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`${str_perms}`);
-                                    action_security_yaml += (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .actionSecurity */ .LU)({ name: action_yaml_name, token_input: token_input, perms: (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .normalizePerms */ .So)(perms) });
+                                    action_security_yaml += (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .actionSecurity */ .LU)({ name: action_yaml_name, token_input: token_input, perms: (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .normalizePerms */ .So)(perms) });
                                 }
                             }
                         }
@@ -8433,8 +8449,8 @@ try {
                             body += `\n#### FollowUp Links.\n${filtered_paths.join("\n")}\n`;
                         }
                         body += "\n### action-security.yml\n" + action_security_yaml;
-                        await (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .comment */ .UI)(client, repos, Number(issue_id), body);
-                        (0,_utils__WEBPACK_IMPORTED_MODULE_4__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
+                        await (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .comment */ .UI)(client, repos, Number(issue_id), body);
+                        (0,_utils__WEBPACK_IMPORTED_MODULE_5__/* .printArray */ .wq)(filtered_paths, "Paths Found: ");
                     }
                 }
             }
@@ -9482,6 +9498,14 @@ module.exports = require("os");
 
 "use strict";
 module.exports = require("path");
+
+/***/ }),
+
+/***/ 7282:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
 
 /***/ }),
 
